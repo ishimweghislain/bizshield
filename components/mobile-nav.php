@@ -12,17 +12,21 @@
             </svg>
             <span class="text-[10px] font-bold uppercase">About</span>
         </a>
-        <a href="how-it-works.php" class="flex flex-col items-center gap-1 <?php echo basename($_SERVER['PHP_SELF']) == 'how-it-works.php' ? 'text-primary' : ''; ?>">
+        
+        <?php if (isset($_SESSION['user_id'])): ?>
+        <a href="<?php echo $_SESSION['role'] == 'admin' ? 'admin/dashboard.php' : 'organization/dashboard.php'; ?>" class="flex flex-col items-center gap-1 text-primary">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <span class="text-[10px] font-bold uppercase">How</span>
+            <span class="text-[10px] font-bold uppercase">Portal</span>
         </a>
+        <?php else: ?>
         <a href="register.php" class="flex flex-col items-center gap-1 <?php echo basename($_SERVER['PHP_SELF']) == 'register.php' ? 'text-primary' : ''; ?>">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>
             <span class="text-[10px] font-bold uppercase">Join</span>
         </a>
+        <?php endif; ?>
     </div>
 </nav>
