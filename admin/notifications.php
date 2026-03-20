@@ -41,6 +41,7 @@ $toast = get_toast_message();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../images/favicon.png">
     <title>Manage Notifications | BizShield</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
@@ -59,15 +60,19 @@ $toast = get_toast_message();
     </script>
     <style>body { font-family: 'Inter', sans-serif; } .sidebar-link.active { background-color: #064E3B; color: white; box-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.1); }</style>
 </head>
-<body class="bg-gray-50/50 flex min-h-screen">
-    <?php include 'components/bottom_nav.php'; ?>
+<body class="bg-gray-50/50">
+    <?php include '../components/marquee.php'; ?>
 
-    <aside class="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 hidden lg:flex">
-        <div class="p-8">
-            <div class="flex items-center gap-3 mb-10">
-                <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-                    <i class="ph ph-shield-check text-2xl"></i>
-                </div>
+    <div class="flex min-h-screen">
+        <?php include 'components/bottom_nav.php'; ?>
+
+        <!-- Sidebar -->
+        <aside class="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 hidden lg:flex">
+            <div class="p-8">
+                <div class="flex items-center gap-3 mb-10">
+                    <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                        <i class="ph ph-shield-check text-2xl"></i>
+                    </div>
                 <span class="text-xl font-bold text-primary tracking-tight">BizShield</span>
             </div>
             <nav class="space-y-1">
@@ -95,8 +100,8 @@ $toast = get_toast_message();
         </div>
         <div class="mt-auto p-8 border-t border-gray-50 bg-gray-50/20">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
-                    <i class="ph ph-user-circle text-2xl"></i>
+                <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
+                    <?php echo strtoupper(substr($_SESSION['username'], 0, 1)); ?>
                 </div>
                 <div><p class="text-sm font-bold text-gray-900"><?php echo $_SESSION['username']; ?></p><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Administrator</p></div>
             </div>
@@ -106,7 +111,7 @@ $toast = get_toast_message();
         </div>
     </aside>
 
-    <main class="flex-grow p-10">
+    <main class="flex-grow p-6 lg:p-10 pb-32">
         <?php if ($toast): ?>
             <div id="toast" class="fixed top-10 right-4 lg:right-10 z-[2000] bg-white border border-gray-100 rounded-2xl shadow-2xl p-6 border-l-4 <?php echo $toast['type'] == 'success' ? 'border-l-green-500' : 'border-l-orange-500'; ?> flex items-center gap-4 animate-bounce-in">
                 <div class="w-10 h-10 rounded-full <?php echo $toast['type'] == 'success' ? 'bg-green-50 text-green-500' : 'bg-orange-50 text-orange-500'; ?> flex items-center justify-center"><i class="ph <?php echo $toast['type'] == 'success' ? 'ph-check-circle' : 'ph-warning-circle'; ?> text-2xl font-bold"></i></div>
@@ -116,7 +121,7 @@ $toast = get_toast_message();
         <?php endif; ?>
 
         <header class="mb-10" data-aos="fade-down">
-            <h1 class="text-2xl font-bold text-gray-900 mb-1">Broadcast Notifications</h1>
+            <h1 class="text-2xl lg:text-3xl font-black text-gray-900 mb-1">Broadcast Notifications</h1>
             <p class="text-sm text-gray-400 font-medium">Send important updates and payment fees to organizations.</p>
         </header>
 
@@ -191,13 +196,19 @@ $toast = get_toast_message();
                             <p class="text-sm text-gray-600 leading-relaxed font-medium"><?php echo $n['message']; ?></p>
                         </div>
                         <?php endforeach; ?>
+                        <?php if (empty($notifications)): ?>
+                        <div class="py-12 text-center">
+                            <p class="text-gray-400 font-medium">No broadcasted messages yet.</p>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+</div>
 
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script>AOS.init({ duration: 800, once: true });</script>
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>AOS.init({ duration: 800, once: true });</script>
 </body>
 </html>
