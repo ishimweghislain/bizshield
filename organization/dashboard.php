@@ -159,7 +159,32 @@ $deadline = $deadline_stmt->fetchColumn() ?: "Not Set";
             </div>
         </div>
 
-        <!-- Latest Notifications -->
+        <!-- Requirements Guidance -->
+        <div class="mb-10" data-aos="fade-up" data-aos-delay="100">
+            <div class="bg-primary/5 border border-primary/10 rounded-[2.5rem] p-8 lg:p-12 relative overflow-hidden group">
+                <div class="absolute -right-10 -top-10 w-48 h-48 bg-primary/5 rounded-full group-hover:scale-110 transition-transform"></div>
+                <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                    <div>
+                        <h2 class="text-2xl font-black text-primary mb-2">Required Insurance Papers</h2>
+                        <p class="text-sm text-gray-500 font-medium max-w-lg leading-relaxed">To qualify for the BizShield insurance coverage, ensure your organization has uploaded the following clear scanned documents.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <div class="px-5 py-3 bg-white rounded-2xl border border-primary/20 shadow-sm flex items-center gap-3">
+                            <i class="ph ph-check-circle text-primary font-bold"></i>
+                            <span class="text-xs font-bold text-gray-700">RDB Certificate</span>
+                        </div>
+                        <div class="px-5 py-3 bg-white rounded-2xl border border-primary/20 shadow-sm flex items-center gap-3">
+                            <i class="ph ph-check-circle text-primary font-bold"></i>
+                            <span class="text-xs font-bold text-gray-700">VAT/TIN Registration</span>
+                        </div>
+                        <div class="px-5 py-3 bg-white rounded-2xl border border-primary/20 shadow-sm flex items-center gap-3">
+                            <i class="ph ph-check-circle text-primary font-bold"></i>
+                            <span class="text-xs font-bold text-gray-700">Sector Recommendation</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 p-8" data-aos="fade-up" data-aos-delay="100">
             <h2 class="text-xl font-bold text-gray-900 mb-8 px-2 flex items-center gap-3">
                 <i class="ph ph-bell-ringing text-primary font-bold"></i>
