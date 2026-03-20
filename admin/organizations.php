@@ -6,9 +6,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
-$message = '';
-$message_type = 'success';
-
 // Handle Actions
 if (isset($_GET['action']) && isset($_GET['id'])) {
     $id = $_GET['id'];
@@ -42,7 +39,7 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
             // Delete organization
             $pdo->prepare("DELETE FROM organizations WHERE id = ?")->execute([$id]);
             $pdo->commit();
-            set_toast_message("Organization and all associated data permanently deleted.", "warning");
+            set_toast_message("Organization and data permanently deleted.", "warning");
         } catch (Exception $e) {
             $pdo->rollBack();
             set_toast_message("Error: " . $e->getMessage(), "warning");
@@ -80,28 +77,23 @@ $toast = get_toast_message();
             }
         }
     </script>
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .sidebar-link.active {
-            background-color: #064E3B;
-            color: white;
-            box-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.1), 0 4px 6px -2px rgba(6, 78, 59, 0.05);
-        }
-    </style>
+    <style>body { font-family: 'Inter', sans-serif; } .sidebar-link.active { background-color: #064E3B; color: white; box-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.1); }</style>
 </head>
-<body class="bg-gray-50/50 flex min-h-screen">
-    <?php include 'components/bottom_nav.php'; ?>
+<body class="bg-gray-50/50">
+    <?php include '../components/marquee.php'; ?>
 
-    <!-- Sidebar -->
-    <aside class="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 hidden lg:flex">
-        <div class="p-8">
-            <div class="flex items-center gap-3 mb-10">
-                <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-                    <i class="ph ph-shield-check text-2xl"></i>
-                </div>
+    <div class="flex min-h-screen">
+        <?php include 'components/bottom_nav.php'; ?>
+
+        <!-- Sidebar -->
+        <aside class="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 hidden lg:flex">
+            <div class="p-8">
+                <div class="flex items-center gap-3 mb-10">
+                    <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                        <i class="ph ph-shield-check text-2xl"></i>
+                    </div>
                 <span class="text-xl font-bold text-primary tracking-tight">BizShield</span>
             </div>
-
             <nav class="space-y-1">
                 <a href="dashboard.php" class="sidebar-link text-gray-400 hover:text-primary hover:bg-green-50/50 flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all group">
                     <i class="ph ph-squares-four text-xl"></i>
@@ -125,57 +117,43 @@ $toast = get_toast_message();
                 </a>
             </nav>
         </div>
-
         <div class="mt-auto p-8 border-t border-gray-50 bg-gray-50/20">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
-                    <i class="ph ph-user-circle text-2xl"></i>
+                <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
+                    <?php echo strtoupper(substr($_SESSION['username'], 0, 1)); ?>
                 </div>
-                <div>
-                    <p class="text-sm font-bold text-gray-900"><?php echo $_SESSION['username']; ?></p>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Administrator</p>
-                </div>
+                <div><p class="text-sm font-bold text-gray-900"><?php echo $_SESSION['username']; ?></p><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Administrator</p></div>
             </div>
             <a href="../logout.php" class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-red-100 transition-all">
-                <i class="ph ph-sign-out"></i>
-                Logout
+                <i class="ph ph-sign-out"></i> Logout
             </a>
         </div>
     </aside>
 
-    <main class="flex-grow p-10">
-        <!-- Toast Notification -->
+    <main class="flex-grow p-6 lg:p-10 pb-32">
         <?php if ($toast): ?>
-        <div class="fixed top-10 right-10 z-[2000] animate-bounce-in bg-white border border-gray-100 rounded-2xl shadow-2xl p-6 border-l-4 <?php echo $toast['type'] == 'success' ? 'border-l-green-500' : 'border-l-orange-500'; ?> flex items-center gap-4">
-            <div class="w-10 h-10 rounded-full <?php echo $toast['type'] == 'success' ? 'bg-green-50 text-green-500' : 'bg-orange-50 text-orange-500'; ?> flex items-center justify-center">
-                <i class="ph <?php echo $toast['type'] == 'success' ? 'ph-check-circle' : 'ph-warning-circle'; ?> text-2xl font-bold"></i>
-            </div>
-            <div>
-                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest"><?php echo ucfirst($toast['type']); ?></p>
-                <p class="text-sm font-bold text-gray-700"><?php echo $toast['message']; ?></p>
-            </div>
+        <div id="toast" class="fixed top-10 right-4 lg:right-10 z-[2000] bg-white border border-gray-100 rounded-2xl shadow-2xl p-6 border-l-4 <?php echo $toast['type'] == 'success' ? 'border-l-green-500' : 'border-l-orange-500'; ?> flex items-center gap-4 animate-bounce-in">
+            <div class="w-10 h-10 rounded-full <?php echo $toast['type'] == 'success' ? 'bg-green-50 text-green-500' : 'bg-orange-50 text-orange-500'; ?> flex items-center justify-center"><i class="ph <?php echo $toast['type'] == 'success' ? 'ph-check-circle' : 'ph-warning-circle'; ?> text-2xl font-bold"></i></div>
+            <div><p class="text-xs text-gray-400 font-bold uppercase tracking-widest"><?php echo ucfirst($toast['type']); ?></p><p class="text-sm font-bold text-gray-700"><?php echo $toast['message']; ?></p></div>
         </div>
-        <script>setTimeout(() => document.querySelector('.animate-bounce-in').remove(), 3000);</script>
+        <script>setTimeout(() => { document.getElementById('toast')?.remove(); }, 3000);</script>
         <?php endif; ?>
 
-        <!-- Header -->
         <header class="flex items-center justify-between mb-10" data-aos="fade-down">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 mb-1">Manage Organizations</h1>
-                <p class="text-sm text-gray-400 font-medium">Approve or reject business registrations.</p>
+                <h1 class="text-2xl lg:text-3xl font-black text-gray-900 mb-1">Manage Organizations</h1>
+                <p class="text-sm text-gray-400 font-medium">Global entity oversight and account status controls.</p>
             </div>
         </header>
 
-        <!-- Organizations Table -->
         <div class="bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 p-8" data-aos="fade-up">
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
                         <tr class="text-left py-4 border-b border-gray-50">
-                            <th class="px-6 py-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest">Organization Details</th>
-                            <th class="px-6 py-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest">Contact Info</th>
-                            <th class="px-6 py-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest">Status</th>
+                            <th class="px-6 py-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest">Organization</th>
                             <th class="px-6 py-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Staff</th>
+                            <th class="px-6 py-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest">Status</th>
                             <th class="px-6 py-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest">Papers</th>
                             <th class="px-6 py-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest text-right">Actions</th>
                         </tr>
@@ -190,21 +168,14 @@ $toast = get_toast_message();
                                     </div>
                                     <div>
                                         <p class="text-sm font-bold text-gray-900"><?php echo $org['name']; ?></p>
-                                        <p class="text-[10px] text-gray-400 font-medium tracking-wide">Owner: <?php echo $org['owner_name']; ?></p>
+                                        <p class="text-[10px] text-gray-400 font-medium truncate w-32"><?php echo $org['email']; ?></p>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-5">
-                                <div class="space-y-1">
-                                    <div class="flex items-center gap-2 text-xs text-gray-500 font-medium">
-                                        <i class="ph ph-envelope text-primary"></i>
-                                        <?php echo $org['email']; ?>
-                                    </div>
-                                    <div class="flex items-center gap-2 text-xs text-gray-500 font-medium">
-                                        <i class="ph ph-phone text-primary"></i>
-                                        <?php echo $org['phone']; ?>
-                                    </div>
-                                </div>
+                            <td class="px-6 py-5 text-center">
+                                <span class="text-sm font-black text-primary bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/10">
+                                    <?php echo $org['user_count']; ?>
+                                </span>
                             </td>
                             <td class="px-6 py-5">
                                 <?php 
@@ -216,55 +187,36 @@ $toast = get_toast_message();
                                 ];
                                 $status_class = $status_classes[$org['status']] ?? 'bg-gray-100 text-gray-500';
                                 ?>
-                                <span class="<?php echo $status_class; ?> text-[9px] font-black uppercase px-3 py-1.5 rounded-full border tracking-widest inline-block shadow-sm">
+                                <span class="<?php echo $status_class; ?> text-[9px] font-black uppercase px-3 py-1.5 rounded-full border tracking-widest">
                                     <?php echo $org['status']; ?>
                                 </span>
                             </td>
-                            <td class="px-6 py-5 text-center">
-                                <span class="text-sm font-black text-primary bg-primary/5 px-2 py-1 rounded-lg">
-                                    <?php echo $org['user_count']; ?>
-                                </span>
-                            </td>
                             <td class="px-6 py-5">
-                                <?php
-                                $stmt = $pdo->prepare("SELECT * FROM documents WHERE organization_id = ? LIMIT 1");
-                                $stmt->execute([$org['id']]);
-                                $doc = $stmt->fetch();
-                                if ($doc):
-                                ?>
-                                <a href="../<?php echo $doc['file_path']; ?>" target="_blank" class="flex items-center gap-2 text-[10px] font-bold text-primary group-hover:bg-primary group-hover:text-white px-3 py-1.5 rounded-xl border border-primary/20 transition-all duration-300">
-                                    <i class="ph ph-file-pdf"></i>
-                                    VIEW
+                                <a href="view_org_docs.php?id=<?php echo $org['id']; ?>" class="text-[10px] font-bold text-primary hover:bg-primary hover:text-white px-3 py-1.5 rounded-xl border border-primary/20 transition-all text-center inline-block">VIEW</a>
+                            </td>
+                            <td class="px-6 py-5 text-right flex items-center justify-end gap-2">
+                                <a href="view_org_docs.php?id=<?php echo $org['id']; ?>" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all shadow-sm" title="View Info">
+                                    <i class="ph ph-eye"></i>
                                 </a>
-                                <?php else: ?>
-                                <span class="text-[10px] font-bold text-gray-300">NO DOCS</span>
-                                <?php endif; ?>
-                            </td>
-                            <td class="px-6 py-5">
-                                <div class="flex items-center justify-end gap-2">
-                                    <a href="view_org_docs.php?id=<?php echo $org['id']; ?>" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all shadow-sm" title="View Detailed Info">
-                                        <i class="ph ph-eye"></i>
-                                    </a>
-                                    <?php if ($org['status'] == 'pending'): ?>
-                                    <a href="?action=approve&id=<?php echo $org['id']; ?>" class="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all shadow-sm" title="Approve">
-                                        <i class="ph ph-check"></i>
-                                    </a>
-                                    <a href="?action=reject&id=<?php echo $org['id']; ?>" class="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm" title="Reject">
-                                        <i class="ph ph-x"></i>
-                                    </a>
-                                    <?php elseif ($org['status'] == 'approved'): ?>
-                                    <a href="?action=disable&id=<?php echo $org['id']; ?>" class="w-8 h-8 rounded-full bg-gray-50 text-gray-500 flex items-center justify-center hover:bg-gray-900 hover:text-white transition-all shadow-sm" title="Disable">
-                                        <i class="ph ph-prohibit"></i>
-                                    </a>
-                                    <?php elseif ($org['status'] == 'disabled' || $org['status'] == 'rejected'): ?>
-                                    <a href="?action=enable&id=<?php echo $org['id']; ?>" class="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all shadow-sm" title="Enable/Approve">
-                                         <i class="ph ph-arrows-clockwise"></i>
-                                     </a>
-                                     <a href="?action=delete&id=<?php echo $org['id']; ?>" onclick="return confirm('WARNING: This will permanently delete ALL data for this organization including users and documents. Proceed?')" class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all shadow-sm" title="Permanently Delete">
-                                         <i class="ph ph-trash"></i>
-                                     </a>
-                                     <?php endif; ?>
-                                 </div>
+                                <?php if ($org['status'] == 'pending'): ?>
+                                <a href="?action=approve&id=<?php echo $org['id']; ?>" class="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all shadow-sm" title="Approve">
+                                    <i class="ph ph-check"></i>
+                                </a>
+                                <a href="?action=reject&id=<?php echo $org['id']; ?>" class="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm" title="Reject">
+                                    <i class="ph ph-x"></i>
+                                </a>
+                                <?php elseif ($org['status'] == 'approved'): ?>
+                                <a href="?action=disable&id=<?php echo $org['id']; ?>" class="w-8 h-8 rounded-full bg-gray-50 text-gray-500 flex items-center justify-center hover:bg-gray-900 hover:text-white transition-all shadow-sm" title="Disable">
+                                    <i class="ph ph-prohibit"></i>
+                                </a>
+                                <?php elseif ($org['status'] == 'disabled' || $org['status'] == 'rejected'): ?>
+                                <a href="?action=enable&id=<?php echo $org['id']; ?>" class="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all shadow-sm" title="Enable">
+                                     <i class="ph ph-arrows-clockwise"></i>
+                                 </a>
+                                 <a href="?action=delete&id=<?php echo $org['id']; ?>" onclick="return confirm('PERMANENTLY DELETE ORGANIZATION?')" class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all shadow-sm" title="Delete">
+                                     <i class="ph ph-trash"></i>
+                                 </a>
+                                 <?php endif; ?>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -273,10 +225,9 @@ $toast = get_toast_message();
             </div>
         </div>
     </main>
+</div>
 
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script>
-        AOS.init({ duration: 800, once: true });
-    </script>
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>AOS.init({ duration: 800, once: true });</script>
 </body>
 </html>
