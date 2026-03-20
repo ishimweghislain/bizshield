@@ -30,6 +30,23 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
         $stmt = $pdo->prepare("UPDATE organizations SET status = 'approved' WHERE id = ?");
         $stmt->execute([$id]);
         set_toast_message("Organization enabled.");
+    } elseif ($action == 'delete') {
+        try {
+            $pdo->beginTransaction();
+            // Delete documents
+            $pdo->prepare("DELETE FROM documents WHERE organization_id = ?")->execute([$id]);
+            // Delete notifications
+            $pdo->prepare("DELETE FROM notifications WHERE organization_id = ?")->execute([$id]);
+            // Delete users
+            $pdo->prepare("DELETE FROM users WHERE organization_id = ?")->execute([$id]);
+            // Delete organization
+            $pdo->prepare("DELETE FROM organizations WHERE id = ?")->execute([$id]);
+            $pdo->commit();
+            set_toast_message("Organization and all associated data permanently deleted.", "warning");
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            set_toast_message("Error: " . $e->getMessage(), "warning");
+        }
     }
     header("Location: organizations.php");
     exit;
@@ -230,10 +247,13 @@ $toast = get_toast_message();
                                     </a>
                                     <?php elseif ($org['status'] == 'disabled' || $org['status'] == 'rejected'): ?>
                                     <a href="?action=enable&id=<?php echo $org['id']; ?>" class="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all shadow-sm" title="Enable/Approve">
-                                        <i class="ph ph-arrows-clockwise"></i>
-                                    </a>
-                                    <?php endif; ?>
-                                </div>
+                                         <i class="ph ph-arrows-clockwise"></i>
+                                     </a>
+                                     <a href="?action=delete&id=<?php echo $org['id']; ?>" onclick="return confirm('WARNING: This will permanently delete ALL data for this organization including users and documents. Proceed?')" class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all shadow-sm" title="Permanently Delete">
+                                         <i class="ph ph-trash"></i>
+                                     </a>
+                                     <?php endif; ?>
+                                 </div>
                             </td>
                         </tr>
                         <?php endforeach; ?>

@@ -26,6 +26,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_user'])) {
     exit;
 }
 
+// Handle User Edit
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_user'])) {
+    $id = $_POST['user_id'];
+    $username = $_POST['username'];
+    $email = $_POST['email'];
+
+    try {
+        $stmt = $pdo->prepare("UPDATE users SET username = ?, email = ? WHERE id = ? AND organization_id = ?");
+        $stmt->execute([$username, $email, $id, $org_id]);
+        set_toast_message("User updated successfully.");
+    } catch (Exception $e) {
+        set_toast_message("Error: " . $e->getMessage(), "warning");
+    }
+    header("Location: users.php");
+    exit;
+}
+
 // Handle User Deletion
 if (isset($_GET['delete'])) {
     $stmt = $pdo->prepare("DELETE FROM users WHERE id = ? AND organization_id = ? AND role != 'org_admin'");
