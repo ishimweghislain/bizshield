@@ -1,21 +1,23 @@
-<div class="bg-primary text-white py-2 overflow-hidden block">
-    <div class="animate-marquee whitespace-nowrap">
-        <div class="flex space-x-12 px-4 italic text-xs font-bold uppercase tracking-wider">
-            <span>Fullstack Ltd: Making Insurance Easy</span>
-            <span>•</span>
-            <span>Join us between March and May</span>
-            <span>•</span>
-            <span>Call Us: (+250) 796 688 978</span>
-            <span>•</span>
-            <span>Fullstack Ltd: Making Insurance Easy</span>
-            <span>•</span>
-            <span>Join us between March and May</span>
-            <span>•</span>
-            <span>Call Us: (+250) 796 688 978</span>
-        </div>
+<?php
+$latest_notif = get_latest_notification($_SESSION['org_id'] ?? null);
+if ($latest_notif):
+?>
+<div class="bg-primary text-white py-2 overflow-hidden sticky top-0 z-[3000] shadow-md border-b border-white/10">
+    <div class="whitespace-nowrap inline-block animate-marquee font-bold text-[10px] lg:text-xs uppercase tracking-[0.2em]">
+        <span class="px-10"><i class="ph ph-bell-ringing mr-2"></i> <?php echo $latest_notif['message']; ?></span>
+        <span class="px-10"><i class="ph ph-bell-ringing mr-2"></i> <?php echo $latest_notif['message']; ?></span>
+        <span class="px-10"><i class="ph ph-bell-ringing mr-2"></i> <?php echo $latest_notif['message']; ?></span>
     </div>
 </div>
+
 <style>
-    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    .animate-marquee { width: fit-content; display: flex; animation: marquee 25s linear infinite; }
+@keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-33.33%); }
+}
+.animate-marquee {
+    display: inline-block;
+    animation: marquee 15s linear infinite;
+}
 </style>
+<?php endif; ?>

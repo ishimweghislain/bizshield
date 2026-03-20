@@ -27,6 +27,13 @@
         </div>
         <span class="text-[10px] font-bold uppercase tracking-widest">Gear</span>
     </a>
+
+    <a href="../logout.php" class="flex flex-col items-center gap-1 text-red-400">
+        <div class="p-2">
+            <i class="ph ph-sign-out text-2xl"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-widest">Exit</span>
+    </a>
 </div>
 
 <style>

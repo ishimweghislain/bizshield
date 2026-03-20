@@ -52,8 +52,8 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     exit;
 }
 
-// Fetch all organizations
-$stmt = $pdo->query("SELECT * FROM organizations ORDER BY created_at DESC");
+// Fetch all organizations with user counts
+$stmt = $pdo->query("SELECT o.*, (SELECT COUNT(*) FROM users u WHERE u.organization_id = o.id) as user_count FROM organizations o ORDER BY o.created_at DESC");
 $organizations = $stmt->fetchAll();
 
 $toast = get_toast_message();
@@ -63,6 +63,7 @@ $toast = get_toast_message();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../images/favicon.png">
     <title>Manage Organizations | BizShield</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
@@ -174,6 +175,7 @@ $toast = get_toast_message();
                             <th class="px-6 py-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest">Organization Details</th>
                             <th class="px-6 py-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest">Contact Info</th>
                             <th class="px-6 py-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest">Status</th>
+                            <th class="px-6 py-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Staff</th>
                             <th class="px-6 py-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest">Papers</th>
                             <th class="px-6 py-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest text-right">Actions</th>
                         </tr>
@@ -218,6 +220,11 @@ $toast = get_toast_message();
                                     <?php echo $org['status']; ?>
                                 </span>
                             </td>
+                            <td class="px-6 py-5 text-center">
+                                <span class="text-sm font-black text-primary bg-primary/5 px-2 py-1 rounded-lg">
+                                    <?php echo $org['user_count']; ?>
+                                </span>
+                            </td>
                             <td class="px-6 py-5">
                                 <?php
                                 $stmt = $pdo->prepare("SELECT * FROM documents WHERE organization_id = ? LIMIT 1");
@@ -227,7 +234,7 @@ $toast = get_toast_message();
                                 ?>
                                 <a href="../<?php echo $doc['file_path']; ?>" target="_blank" class="flex items-center gap-2 text-[10px] font-bold text-primary group-hover:bg-primary group-hover:text-white px-3 py-1.5 rounded-xl border border-primary/20 transition-all duration-300">
                                     <i class="ph ph-file-pdf"></i>
-                                    VIEW DOC
+                                    VIEW
                                 </a>
                                 <?php else: ?>
                                 <span class="text-[10px] font-bold text-gray-300">NO DOCS</span>
@@ -235,6 +242,9 @@ $toast = get_toast_message();
                             </td>
                             <td class="px-6 py-5">
                                 <div class="flex items-center justify-end gap-2">
+                                    <a href="view_org_docs.php?id=<?php echo $org['id']; ?>" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all shadow-sm" title="View Detailed Info">
+                                        <i class="ph ph-eye"></i>
+                                    </a>
                                     <?php if ($org['status'] == 'pending'): ?>
                                     <a href="?action=approve&id=<?php echo $org['id']; ?>" class="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all shadow-sm" title="Approve">
                                         <i class="ph ph-check"></i>
