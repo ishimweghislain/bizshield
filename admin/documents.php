@@ -62,6 +62,7 @@ $toast = get_toast_message();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../images/favicon.png">
     <title>All Documents | BizShield</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
@@ -80,18 +81,21 @@ $toast = get_toast_message();
     </script>
     <style>body { font-family: 'Inter', sans-serif; } .sidebar-link.active { background-color: #064E3B; color: white; box-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.1); }</style>
 </head>
-<body class="bg-gray-50/50 flex min-h-screen">
+<body class="bg-gray-50/50">
+    <?php include '../components/marquee.php'; ?>
 
-    <!-- Sidebar (Same as dashboard) -->
-    <aside class="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 hidden lg:flex">
-        <div class="p-8">
-            <div class="flex items-center gap-3 mb-10">
-                <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-                    <i class="ph ph-shield-check text-2xl"></i>
-                </div>
+    <div class="flex min-h-screen">
+        <?php include 'components/bottom_nav.php'; ?>
+
+        <!-- Sidebar -->
+        <aside class="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 hidden lg:flex">
+            <div class="p-8">
+                <div class="flex items-center gap-3 mb-10">
+                    <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                        <i class="ph ph-shield-check text-2xl"></i>
+                    </div>
                 <span class="text-xl font-bold text-primary tracking-tight">BizShield</span>
             </div>
-
             <nav class="space-y-1">
                 <a href="dashboard.php" class="sidebar-link text-gray-400 hover:text-primary hover:bg-green-50/50 flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all group">
                     <i class="ph ph-squares-four text-xl"></i>
@@ -115,11 +119,10 @@ $toast = get_toast_message();
                 </a>
             </nav>
         </div>
-
         <div class="mt-auto p-8 border-t border-gray-50 bg-gray-50/20">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
-                    <i class="ph ph-user-circle text-2xl"></i>
+                <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
+                    <?php echo strtoupper(substr($_SESSION['username'], 0, 1)); ?>
                 </div>
                 <div><p class="text-sm font-bold text-gray-900"><?php echo $_SESSION['username']; ?></p><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Administrator</p></div>
             </div>
@@ -129,22 +132,17 @@ $toast = get_toast_message();
         </div>
     </aside>
 
-    <main class="flex-grow p-10">
+    <main class="flex-grow p-6 lg:p-10 pb-32">
         <?php if ($toast): ?>
-        <div class="fixed top-10 right-10 z-[2000] animate-bounce-in bg-white border border-gray-100 rounded-2xl shadow-2xl p-6 border-l-4 <?php echo $toast['type'] == 'success' ? 'border-l-green-500' : 'border-l-orange-500'; ?> flex items-center gap-4">
-            <div class="w-10 h-10 rounded-full <?php echo $toast['type'] == 'success' ? 'bg-green-50 text-green-500' : 'bg-orange-50 text-orange-500'; ?> flex items-center justify-center">
-                <i class="ph <?php echo $toast['type'] == 'success' ? 'ph-check-circle' : 'ph-warning-circle'; ?> text-2xl font-bold"></i>
-            </div>
-            <div>
-                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest"><?php echo ucfirst($toast['type']); ?></p>
-                <p class="text-sm font-bold text-gray-700"><?php echo $toast['message']; ?></p>
-            </div>
+        <div id="toast" class="fixed top-10 right-4 lg:right-10 z-[2000] bg-white border border-gray-100 rounded-2xl shadow-2xl p-6 border-l-4 <?php echo $toast['type'] == 'success' ? 'border-l-green-500' : 'border-l-orange-500'; ?> flex items-center gap-4 animate-bounce-in">
+            <div class="w-10 h-10 rounded-full <?php echo $toast['type'] == 'success' ? 'bg-green-50 text-green-500' : 'bg-orange-50 text-orange-500'; ?> flex items-center justify-center"><i class="ph <?php echo $toast['type'] == 'success' ? 'ph-check-circle' : 'ph-warning-circle'; ?> text-2xl font-bold"></i></div>
+            <div><p class="text-xs text-gray-400 font-bold uppercase tracking-widest"><?php echo ucfirst($toast['type']); ?></p><p class="text-sm font-bold text-gray-700"><?php echo $toast['message']; ?></p></div>
         </div>
-        <script>setTimeout(() => document.querySelector('.animate-bounce-in').remove(), 3000);</script>
+        <script>setTimeout(() => { document.getElementById('toast')?.remove(); }, 3000);</script>
         <?php endif; ?>
 
         <header class="mb-10" data-aos="fade-down">
-            <h1 class="text-2xl font-bold text-gray-900 mb-1">Company Documents</h1>
+            <h1 class="text-2xl lg:text-3xl font-black text-gray-900 mb-1">Company Documents</h1>
             <p class="text-sm text-gray-400 font-medium">Review and download uploaded certificates from all organizations.</p>
         </header>
 
@@ -152,7 +150,6 @@ $toast = get_toast_message();
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 <?php foreach ($documents as $doc): ?>
                 <div class="group p-6 bg-gray-50/50 border border-gray-50 rounded-[2rem] hover:bg-white hover:border-primary/20 transition-all duration-500 relative">
-                    <!-- Status Badge -->
                     <div class="absolute top-4 right-4">
                         <?php 
                         $status_classes = [
@@ -171,13 +168,7 @@ $toast = get_toast_message();
                         <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-gray-100 text-primary shadow-sm group-hover:scale-110 transition-transform">
                             <?php 
                             $ext = strtolower($doc['file_type']);
-                            if (in_array($ext, ['jpg', 'jpeg', 'png', 'svg'])) {
-                                echo '<i class="ph ph-image text-2xl"></i>';
-                            } else if ($ext == 'pdf') {
-                                echo '<i class="ph ph-file-pdf text-2xl text-red-500"></i>';
-                            } else {
-                                echo '<i class="ph ph-file text-2xl"></i>';
-                            }
+                            echo in_array($ext, ['jpg', 'jpeg', 'png', 'svg']) ? '<i class="ph ph-image text-2xl"></i>' : '<i class="ph ph-file-pdf text-2xl text-red-500"></i>';
                             ?>
                         </div>
                         <div class="flex gap-2">
@@ -191,7 +182,6 @@ $toast = get_toast_message();
                         <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest"><?php echo $doc['org_name']; ?></p>
                     </div>
 
-                    <!-- Approval Actions -->
                     <?php if ($doc['status'] == 'pending'): ?>
                     <div class="flex gap-2 mb-6">
                         <a href="?action=approve&id=<?php echo $doc['id']; ?>" class="flex-1 bg-green-500 text-white text-[10px] font-bold py-2 rounded-xl text-center hover:bg-green-600 transition-all">APPROVE</a>
@@ -213,55 +203,49 @@ $toast = get_toast_message();
             </div>
             <?php if (empty($documents)): ?>
             <div class="py-24 text-center">
-                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mx-auto mb-4">
-                    <i class="ph ph-folder-open text-3xl"></i>
-                </div>
+                <i class="ph ph-folder-open text-3xl text-gray-300 mb-4 mx-auto block"></i>
                 <p class="text-gray-400 font-medium">No documents uploaded yet.</p>
             </div>
             <?php endif; ?>
         </div>
     </main>
+</div>
 
-    <!-- Reject Modal -->
-    <div id="rejectModal" class="fixed inset-0 z-[5000] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-[3rem] shadow-2xl overflow-hidden" data-aos="zoom-in">
-            <div class="bg-red-500 p-10 text-white text-center">
-                <i class="ph ph-x-circle text-5xl mb-4"></i>
-                <h2 class="text-2xl font-bold mb-1 font-serif">Reject Document</h2>
-                <p id="modalDocName" class="text-red-100 text-[10px] font-bold uppercase tracking-widest italic truncate"></p>
-            </div>
-            <form action="" method="POST" class="p-10 space-y-6">
-                <input type="hidden" name="doc_id" id="modalDocId">
-                <div class="space-y-2">
-                    <label class="text-[10px] text-primary font-bold ml-1 uppercase tracking-widest">Reason for Rejection</label>
-                    <textarea name="reason" required placeholder="e.g. Scanned copy is not clear..." class="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm h-32"></textarea>
-                </div>
-                <div class="flex gap-4">
-                    <button type="button" onclick="closeRejectModal()" class="flex-1 bg-gray-50 text-gray-400 py-4 rounded-2xl font-bold text-sm hover:bg-gray-100">Cancel</button>
-                    <button type="submit" name="reject_doc" class="flex-2 bg-red-500 text-white px-8 py-4 rounded-2xl font-bold text-sm hover:bg-red-600 transition-all shadow-xl shadow-red-900/10">Confirm Rejection</button>
-                </div>
-            </form>
+<!-- Reject Modal -->
+<div id="rejectModal" class="fixed inset-0 z-[5000] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-[3rem] shadow-2xl overflow-hidden" data-aos="zoom-in">
+        <div class="bg-red-500 p-10 text-white text-center">
+            <i class="ph ph-x-circle text-5xl mb-4"></i>
+            <h2 class="text-2xl font-bold mb-1 font-serif">Reject Document</h2>
+            <p id="modalDocName" class="text-red-100 text-[10px] font-bold uppercase tracking-widest italic truncate"></p>
         </div>
+        <form action="" method="POST" class="p-10 space-y-6">
+            <input type="hidden" name="doc_id" id="modalDocId">
+            <div class="space-y-2">
+                <label class="text-[10px] text-primary font-bold ml-1 uppercase tracking-widest">Reason for Rejection</label>
+                <textarea name="reason" required placeholder="e.g. Scanned copy is not clear..." class="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm h-32"></textarea>
+            </div>
+            <div class="flex gap-4">
+                <button type="button" onclick="closeRejectModal()" class="flex-1 bg-gray-50 text-gray-400 py-4 rounded-2xl font-bold text-sm hover:bg-gray-100">Cancel</button>
+                <button type="submit" name="reject_doc" class="flex-2 bg-red-500 text-white px-8 py-4 rounded-2xl font-bold text-sm hover:bg-red-600 transition-all shadow-xl shadow-red-900/10">Confirm Rejection</button>
+            </div>
+        </form>
     </div>
+</div>
 
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script>
-        AOS.init({ duration: 800, once: true });
-        function openRejectModal(id, name) {
-            document.getElementById('modalDocId').value = id;
-            document.getElementById('modalDocName').textContent = name;
-            document.getElementById('rejectModal').classList.remove('hidden');
-            document.getElementById('rejectModal').classList.add('flex');
-        }
-        function closeRejectModal() {
-            document.getElementById('rejectModal').classList.add('hidden');
-            document.getElementById('rejectModal').classList.remove('flex');
-        }
-    </script>
-</body>
-</html>
-
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script>AOS.init({ duration: 800, once: true });</script>
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>
+    AOS.init({ duration: 800, once: true });
+    function openRejectModal(id, name) {
+        document.getElementById('modalDocId').value = id;
+        document.getElementById('modalDocName').textContent = name;
+        document.getElementById('rejectModal').classList.remove('hidden');
+        document.getElementById('rejectModal').classList.add('flex');
+    }
+    function closeRejectModal() {
+        document.getElementById('rejectModal').classList.add('hidden');
+        document.getElementById('rejectModal').classList.remove('flex');
+    }
+</script>
 </body>
 </html>
