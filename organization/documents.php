@@ -63,7 +63,8 @@ $toast = get_toast_message();
     </script>
     <style>body { font-family: 'Inter', sans-serif; } .sidebar-link.active { background-color: #064E3B; color: white; box-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.1); }</style>
 </head>
-<body class="bg-gray-50/50 flex min-h-screen">
+    <body class="bg-gray-50/50 flex min-h-screen">
+    <?php include 'components/bottom_nav.php'; ?>
 
     <aside class="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 hidden lg:flex">
         <div class="p-8">
@@ -101,30 +102,46 @@ $toast = get_toast_message();
         </div>
     </aside>
 
-    <main class="flex-grow p-10">
+    <main class="flex-grow p-6 lg:p-10 pb-32">
         <?php if ($toast): ?>
-            <div class="fixed top-10 right-10 z-[2000] bg-white border border-gray-100 rounded-2xl shadow-2xl p-6 border-l-4 <?php echo $toast['type'] == 'success' ? 'border-l-green-500' : 'border-l-orange-500'; ?> flex items-center gap-4 animate-bounce-in">
-                <div class="w-10 h-10 rounded-full <?php echo $toast['type'] == 'success' ? 'bg-green-50 text-green-500' : 'bg-orange-50 text-orange-500'; ?> flex items-center justify-center"><i class="ph ph-check-circle text-2xl font-bold"></i></div>
+            <div id="toast" class="fixed top-10 right-4 lg:right-10 z-[2000] bg-white border border-gray-100 rounded-2xl shadow-2xl p-6 border-l-4 <?php echo $toast['type'] == 'success' ? 'border-l-green-500' : 'border-l-orange-500'; ?> flex items-center gap-4 animate-bounce-in">
+                <div class="w-10 h-10 rounded-full <?php echo $toast['type'] == 'success' ? 'bg-green-50 text-green-500' : 'bg-orange-50 text-orange-500'; ?> flex items-center justify-center"><i class="ph <?php echo $toast['type'] == 'success' ? 'ph-check-circle' : 'ph-warning-circle'; ?> text-2xl font-bold"></i></div>
                 <div><p class="text-xs text-gray-400 font-bold uppercase tracking-widest"><?php echo ucfirst($toast['type']); ?></p><p class="text-sm font-bold text-gray-700"><?php echo $toast['message']; ?></p></div>
             </div>
+            <script>setTimeout(() => { document.getElementById('toast')?.remove(); }, 3000);</script>
         <?php endif; ?>
 
         <header class="flex items-center justify-between mb-10" data-aos="fade-down">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 mb-1">Upload Certificates</h1>
-                <p class="text-sm text-gray-400 font-medium">Keep your business papers updated for insurance coverage.</p>
+                <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-1">Upload Certificates</h1>
+                <p class="text-xs lg:text-sm text-gray-400 font-medium tracking-tighter">Business papers for insurance coverage.</p>
             </div>
-            <button onclick="document.getElementById('uploadModal').classList.remove('hidden')" class="bg-primary text-white px-6 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 hover:bg-primary-light transition-all shadow-lg shadow-green-900/10 active:scale-[0.98]">
+            <button onclick="document.getElementById('uploadModal').classList.remove('hidden')" class="bg-primary text-white p-3 lg:px-6 lg:py-3 rounded-2xl font-bold text-sm flex items-center gap-2 hover:bg-primary-light transition-all shadow-lg active:scale-[0.98]">
                 <i class="ph ph-upload-simple text-xl font-bold"></i>
-                Upload New Doc
+                <span class="hidden lg:inline">Upload New Doc</span>
             </button>
         </header>
 
         <!-- Document Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-aos="fade-up">
             <?php foreach ($documents as $doc): ?>
-            <div class="group p-6 bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 hover:border-primary/20 transition-all duration-500">
-                <div class="flex items-center justify-between mb-6">
+            <div class="group p-6 bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 hover:border-primary/20 transition-all duration-500 relative overflow-hidden">
+                <!-- Status Badge -->
+                <div class="absolute top-4 right-4 animate-pulse-slow">
+                    <?php 
+                    $status_classes = [
+                        'pending' => 'bg-orange-50 text-orange-600 border-orange-100',
+                        'approved' => 'bg-green-50 text-green-600 border-green-100',
+                        'rejected' => 'bg-red-50 text-red-600 border-red-100'
+                    ];
+                    $status_class = $status_classes[$doc['status']] ?? 'bg-gray-100 text-gray-400';
+                    ?>
+                    <span class="<?php echo $status_class; ?> text-[8px] font-black uppercase px-2 py-1 rounded-full border tracking-tighter shadow-sm">
+                        <?php echo $doc['status']; ?>
+                    </span>
+                </div>
+
+                <div class="flex items-center justify-between mb-4 mt-2">
                     <div class="w-14 h-14 bg-gray-50 rounded-3xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-sm">
                         <?php 
                         $ext = strtolower($doc['file_type']);
@@ -137,13 +154,22 @@ $toast = get_toast_message();
                         }
                         ?>
                     </div>
-                    <a href="../<?php echo $doc['file_path']; ?>" download class="w-10 h-10 bg-primary/5 text-primary rounded-full flex items-center justify-center hover:bg-primary hover:text-white transition-all">
-                        <i class="ph ph-download-simple font-bold"></i>
-                    </a>
+                    <div class="flex gap-2">
+                        <a href="../<?php echo $doc['file_path']; ?>" target="_blank" class="w-10 h-10 bg-white border border-gray-50 text-gray-400 rounded-full flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-sm">
+                            <i class="ph ph-eye font-bold"></i>
+                        </a>
+                    </div>
                 </div>
                 <div class="space-y-1 mb-8">
                     <h3 class="text-sm font-bold text-gray-900 truncate"><?php echo $doc['file_name']; ?></h3>
+                    <?php if ($doc['status'] == 'rejected'): ?>
+                    <p class="text-[10px] text-red-500 font-bold bg-red-50 p-2 rounded-xl mt-2 leading-tight">
+                        <i class="ph ph-warning-circle inline-block mr-1 text-xs"></i>
+                        <?php echo $doc['rejection_reason'] ?: 'Rejected without reason.'; ?>
+                    </p>
+                    <?php else: ?>
                     <p class="text-[10px] text-gray-300 font-bold uppercase tracking-widest italic"><?php echo $doc['file_type']; ?> format</p>
+                    <?php endif; ?>
                 </div>
                 <div class="flex items-center justify-between pt-4 border-t border-gray-50">
                     <div class="flex items-center gap-2">

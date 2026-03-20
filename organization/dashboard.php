@@ -65,6 +65,7 @@ $deadline = $deadline_stmt->fetchColumn() ?: "Not Set";
     <style>body { font-family: 'Inter', sans-serif; } .sidebar-link.active { background-color: #064E3B; color: white; box-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.1); }</style>
 </head>
 <body class="bg-gray-50/50 flex min-h-screen">
+    <?php include 'components/bottom_nav.php'; ?>
 
     <!-- Sidebar -->
     <aside class="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 hidden lg:flex">

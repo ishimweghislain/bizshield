@@ -56,9 +56,10 @@ $deadline = $deadline_stmt->fetchColumn() ?: "Not Set";
     </style>
 </head>
 <body class="bg-gray-50/50 flex min-h-screen">
+    <?php include 'components/bottom_nav.php'; ?>
 
     <!-- Sidebar -->
-    <aside class="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0">
+    <aside class="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 hidden lg:flex">
         <div class="p-8">
             <div class="flex items-center gap-3 mb-10">
                 <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
