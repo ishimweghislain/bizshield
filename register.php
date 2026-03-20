@@ -4,12 +4,13 @@ require_once 'config.php';
 $error = '';
 $success = '';
 
+$biz_name = $_POST['biz_name'] ?? '';
+$owner_name = $_POST['owner_name'] ?? '';
+$email = $_POST['email'] ?? '';
+$phone = $_POST['phone'] ?? '';
+$username = $_POST['username'] ?? '';
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
-    $biz_name = $_POST['biz_name'];
-    $owner_name = $_POST['owner_name'];
-    $email = $_POST['email'];
-    $phone = $_POST['phone'];
-    $username = $_POST['username'];
     $password = $_POST['password'];
 
     // Basic validation
@@ -21,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
             $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
             $stmt->execute([$username, $email]);
             if ($stmt->fetch()) {
-                $error = "Username or Email already exists.";
+                $error = "Username or Email already exists. Please try another one.";
             } else {
                 $pdo->beginTransaction();
 
@@ -105,33 +106,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
             </div>
             
             <?php if ($error): ?>
-                <div class="mx-10 mt-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-sm"><?php echo $error; ?></div>
+                <div class="mx-10 mt-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-sm font-bold flex items-center gap-3">
+                    <i class="ph ph-warning-circle text-xl"></i>
+                    <?php echo $error; ?>
+                </div>
             <?php endif; ?>
 
             <form action="" method="POST" enctype="multipart/form-data" class="p-10 space-y-6 text-sm font-medium">
                 <div class="grid grid-cols-1 gap-6">
                     <div class="space-y-2">
                         <label class="text-xs text-primary font-bold ml-1 uppercase tracking-wider">Business Name</label>
-                        <input type="text" name="biz_name" required placeholder="Your Company Name" class="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all">
+                        <input type="text" name="biz_name" value="<?php echo htmlspecialchars($biz_name); ?>" required placeholder="Your Company Name" class="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all">
                     </div>
                     <div class="space-y-2">
                         <label class="text-xs text-primary font-bold ml-1 uppercase tracking-wider">Owner Name</label>
-                        <input type="text" name="owner_name" required placeholder="Full Legal Name" class="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all">
+                        <input type="text" name="owner_name" value="<?php echo htmlspecialchars($owner_name); ?>" required placeholder="Full Legal Name" class="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all">
                     </div>
                     <div class="grid grid-cols-2 gap-6">
                         <div class="space-y-2">
                             <label class="text-xs text-primary font-bold ml-1 uppercase tracking-wider">Email</label>
-                            <input type="email" name="email" required placeholder="email@company.rw" class="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all">
+                            <input type="email" name="email" value="<?php echo htmlspecialchars($email); ?>" required placeholder="email@company.rw" class="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all">
                         </div>
                         <div class="space-y-2">
                             <label class="text-xs text-primary font-bold ml-1 uppercase tracking-wider">Phone</label>
-                            <input type="tel" name="phone" required placeholder="+250 7XX XXX XXX" class="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all">
+                            <input type="tel" name="phone" value="<?php echo htmlspecialchars($phone); ?>" required placeholder="+250 7XX XXX XXX" class="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-6">
                         <div class="space-y-2">
                             <label class="text-xs text-primary font-bold ml-1 uppercase tracking-wider">Username</label>
-                            <input type="text" name="username" required placeholder="Choose username" class="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all">
+                            <input type="text" name="username" value="<?php echo htmlspecialchars($username); ?>" required placeholder="Choose username" class="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all">
                         </div>
                         <div class="space-y-2">
                             <label class="text-xs text-primary font-bold ml-1 uppercase tracking-wider">Password</label>
