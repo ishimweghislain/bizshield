@@ -132,7 +132,7 @@ $deadline = $deadline_stmt->fetchColumn() ?: "Not Set";
 
         <!-- Stats Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10" data-aos="fade-up" data-aos-delay="100">
-            <div class="p-8 bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 relative overflow-hidden group">
+            <a href="organizations.php" class="p-8 bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 relative overflow-hidden group hover:border-primary/20 transition-all duration-300">
                 <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
                 <div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-6">
                     <i class="ph ph-buildings text-2xl font-bold"></i>
@@ -140,18 +140,17 @@ $deadline = $deadline_stmt->fetchColumn() ?: "Not Set";
                 <p class="text-sm text-gray-400 mb-1 font-semibold">Total Organizations</p>
                 <div class="flex items-baseline gap-2">
                     <h3 class="text-3xl font-black text-gray-900"><?php echo $total_orgs; ?></h3>
-                    <span class="text-xs text-green-500 font-bold">+2 New</span>
                 </div>
-            </div>
+            </a>
 
-            <div class="p-8 bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 relative overflow-hidden group">
+            <a href="organizations.php" class="p-8 bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 relative overflow-hidden group hover:border-red-100 transition-all duration-300">
                 <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-red-50 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
                 <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 mb-6">
                     <i class="ph ph-warning-circle text-2xl font-bold"></i>
                 </div>
                 <p class="text-sm text-gray-400 mb-1 font-semibold">Pending Approval</p>
                 <h3 class="text-3xl font-black text-gray-900"><?php echo $pending_orgs; ?></h3>
-            </div>
+            </a>
 
             <div class="p-8 bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 relative overflow-hidden group">
                 <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
@@ -162,14 +161,14 @@ $deadline = $deadline_stmt->fetchColumn() ?: "Not Set";
                 <h3 class="text-3xl font-black text-gray-900"><?php echo $total_users; ?></h3>
             </div>
 
-            <div class="p-8 bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 relative overflow-hidden group">
+            <a href="documents.php" class="p-8 bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 relative overflow-hidden group hover:border-orange-100 transition-all duration-300">
                 <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-orange-50 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
                 <div class="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500 mb-6">
                     <i class="ph ph-file-arrow-down text-2xl font-bold"></i>
                 </div>
                 <p class="text-sm text-gray-400 mb-1 font-semibold">Total Documents</p>
                 <h3 class="text-3xl font-black text-gray-900"><?php echo $total_docs; ?></h3>
-            </div>
+            </a>
         </div>
 
         <!-- Recent Organizations Table -->

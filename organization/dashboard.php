@@ -130,23 +130,23 @@ $deadline = $deadline_stmt->fetchColumn() ?: "Not Set";
 
         <!-- Stats Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10" data-aos="fade-up">
-            <div class="p-8 bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 relative overflow-hidden group">
+            <a href="users.php" class="p-8 bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 relative overflow-hidden group hover:border-primary/20 transition-all duration-300">
                 <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
                 <div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-6">
                     <i class="ph ph-users text-2xl font-bold"></i>
                 </div>
                 <p class="text-sm text-gray-400 mb-1 font-semibold">Total Users</p>
                 <h3 class="text-3xl font-black text-gray-900"><?php echo $total_users; ?></h3>
-            </div>
+            </a>
 
-            <div class="p-8 bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 relative overflow-hidden group">
+            <a href="documents.php" class="p-8 bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 relative overflow-hidden group hover:border-blue-100 transition-all duration-300">
                 <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
                 <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 mb-6">
                     <i class="ph ph-files text-2xl font-bold"></i>
                 </div>
                 <p class="text-sm text-gray-400 mb-1 font-semibold">Uploaded Papers</p>
                 <h3 class="text-3xl font-black text-gray-900"><?php echo $total_docs; ?></h3>
-            </div>
+            </a>
 
             <div class="p-8 bg-primary text-white rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
                 <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
