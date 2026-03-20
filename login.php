@@ -61,14 +61,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
         }
     </script>
 </head>
-<body class="font-sans text-gray-900 bg-gray-50/50 flex flex-col min-h-screen">
-
+<body class="bg-gray-50/50">
     <header class="sticky top-0 w-full z-[1000] bg-white">
         <?php include 'components/marquee.php'; ?>
         <?php include 'components/navbar.php'; ?>
     </header>
 
-    <main class="flex-grow flex items-center justify-center px-4 py-12" data-aos="fade-up">
+    <main class="min-h-[80vh] flex items-center justify-center px-4 py-12" data-aos="fade-up">
         <div class="max-w-md w-full bg-white rounded-[3rem] shadow-2xl border border-gray-100 overflow-hidden">
             <div class="bg-primary p-10 text-white text-center">
                 <h1 class="text-3xl font-bold mb-3 font-serif">Welcome Back</h1>
@@ -109,9 +108,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
         </div>
     </main>
 
+    <footer class="mt-auto">
+        <?php include 'components/footer.php'; ?>
+    </footer>
+
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script>
-        AOS.init();
-    </script>
+    <script>AOS.init();</script>
 </body>
 </html>
