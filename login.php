@@ -15,8 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
     if ($user && password_verify($password, $user['password'])) {
         if ($user['status'] == 'disabled') {
             $error = "Your account has been disabled.";
-        } else if ($user['role'] != 'admin' && $user['org_status'] != 'approved') {
-            $error = "Your organization has not yet been admitted. Please wait for approval.";
+        } else if ($user['role'] != 'admin' && $user['org_status'] == 'disabled') {
+            $error = "Your organization has been disabled by the administrator.";
         } else {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['role'] = $user['role'];

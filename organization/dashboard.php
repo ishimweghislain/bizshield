@@ -40,6 +40,35 @@ $deadline_stmt = $pdo->prepare("SELECT setting_value FROM settings WHERE setting
 $deadline_stmt->execute();
 $deadline = $deadline_stmt->fetchColumn() ?: "Not Set";
 
+// Check for rejected docs
+$rejected_docs_stmt = $pdo->prepare("SELECT * FROM documents WHERE organization_id = ? AND status = 'rejected'");
+$rejected_docs_stmt->execute([$org_id]);
+$rejected_docs = $rejected_docs_stmt->fetchAll();
+
+$toast = get_toast_message();
+
+// Handle new upload from dashboard if needed
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['new_doc'])) {
+    $upload_dir = '../uploads/docs/';
+    if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+    
+    $file_name = $_FILES['new_doc']['name'];
+    $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
+    $new_file_name = "org_" . $org_id . "_re_" . time() . "." . $file_ext;
+    $target_file = $upload_dir . $new_file_name;
+    
+    if (move_uploaded_file($_FILES['new_doc']['tmp_name'], $target_file)) {
+        $stmt = $pdo->prepare("INSERT INTO documents (organization_id, user_id, file_path, file_name, file_type, status) VALUES (?, ?, ?, ?, ?, 'pending')");
+        $stmt->execute([$org_id, $_SESSION['user_id'], 'uploads/docs/' . $new_file_name, $file_name, $file_ext]);
+        
+        // Update org status back to pending if it was rejected
+        $pdo->prepare("UPDATE organizations SET status = 'pending' WHERE id = ?")->execute([$org_id]);
+        
+        set_toast_message("New document submitted for review.");
+        header("Location: dashboard.php");
+        exit;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -115,6 +144,14 @@ $deadline = $deadline_stmt->fetchColumn() ?: "Not Set";
         </aside>
 
         <main class="flex-grow p-6 lg:p-10 pb-32">
+            <?php if ($toast): ?>
+            <div id="toast" class="fixed top-24 right-4 lg:right-10 z-[2000] bg-white border border-gray-100 rounded-2xl shadow-2xl p-6 border-l-4 <?php echo $toast['type'] == 'success' ? 'border-l-green-500' : 'border-l-orange-500'; ?> flex items-center gap-4 animate-bounce-in">
+                <div class="w-10 h-10 rounded-full <?php echo $toast['type'] == 'success' ? 'bg-green-50 text-green-500' : 'bg-orange-50 text-orange-500'; ?> flex items-center justify-center"><i class="ph <?php echo $toast['type'] == 'success' ? 'ph-check-circle' : 'ph-warning-circle'; ?> text-2xl font-bold"></i></div>
+                <div><p class="text-xs text-gray-400 font-bold uppercase tracking-widest"><?php echo ucfirst($toast['type']); ?></p><p class="text-sm font-bold text-gray-700"><?php echo $toast['message']; ?></p></div>
+            </div>
+            <script>setTimeout(() => { document.getElementById('toast')?.remove(); }, 4000);</script>
+            <?php endif; ?>
+
             <!-- Header -->
             <header class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10" data-aos="fade-down">
                 <div>
@@ -133,6 +170,47 @@ $deadline = $deadline_stmt->fetchColumn() ?: "Not Set";
                     </div>
                 </div>
             </header>
+
+            <!-- Rejected Docs Alart -->
+            <?php if (!empty($rejected_docs)): ?>
+            <div class="mb-10" data-aos="fade-up">
+                <div class="bg-red-50 border border-red-100 rounded-[2.5rem] p-8 lg:p-12 relative overflow-hidden group">
+                    <div class="absolute -right-10 -top-10 w-48 h-48 bg-red-500/5 rounded-full group-hover:scale-110 transition-transform"></div>
+                    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                        <div>
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 bg-red-500 text-white rounded-xl flex items-center justify-center font-black">
+                                    <i class="ph ph-warning-octagon text-xl"></i>
+                                </div>
+                                <h2 class="text-2xl font-black text-red-600">Action Required</h2>
+                            </div>
+                            <p class="text-sm text-red-800 font-medium max-w-lg leading-relaxed mb-6">Your organization's admission is on hold because some documents were rejected by the administrator.</p>
+                            
+                            <div class="space-y-4">
+                                <?php foreach ($rejected_docs as $rd): ?>
+                                <div class="bg-white/50 backdrop-blur-sm border border-red-200/50 p-6 rounded-2xl">
+                                    <p class="text-[10px] text-red-400 font-black uppercase tracking-[.2em] mb-1">REASON FOR <?php echo strtoupper($rd['file_name']); ?></p>
+                                    <p class="text-xs font-bold text-gray-700 italic">"<?php echo $rd['rejection_reason']; ?>"</p>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-red-100 w-full lg:w-96">
+                            <h3 class="text-sm font-black text-gray-900 mb-4 uppercase tracking-widest">Re-upload Documents</h3>
+                            <form action="" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                <label class="border-2 border-dashed border-red-100 rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-all">
+                                    <i class="ph ph-cloud-arrow-up text-3xl text-red-400 mb-2"></i>
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase">Click to Select File</span>
+                                    <input type="file" name="new_doc" required class="hidden" onchange="this.form.submit()">
+                                </label>
+                                <p class="text-[8px] text-gray-400 text-center uppercase font-bold tracking-widest">Supports PDF, JPG, PNG up to 10MB</p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <!-- Stats Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10" data-aos="fade-up">
@@ -154,10 +232,10 @@ $deadline = $deadline_stmt->fetchColumn() ?: "Not Set";
                     <h3 class="text-3xl font-black text-gray-900"><?php echo $total_docs; ?></h3>
                 </a>
 
-                <div class="p-8 bg-primary text-white rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
+                <div class="p-8 <?php echo $org['status'] == 'rejected' ? 'bg-red-500' : 'bg-primary'; ?> text-white rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
                     <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
                     <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="ph ph-user-check text-2xl font-bold"></i>
+                        <i class="ph <?php echo $org['status'] == 'rejected' ? 'ph-warning' : 'ph-user-check'; ?> text-2xl font-bold"></i>
                     </div>
                     <p class="text-sm text-green-100 mb-1 font-semibold">Account Status</p>
                     <h3 class="text-2xl font-black uppercase tracking-widest text-white"><?php echo $org['status']; ?></h3>
