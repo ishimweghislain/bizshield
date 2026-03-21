@@ -320,6 +320,9 @@ $toast = get_toast_message();
                 </div>
                 <div class="space-y-1 mb-8">
                     <h3 class="text-sm font-bold text-gray-900 truncate"><?php echo $doc['file_name']; ?></h3>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-[8px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded border border-primary/10 tracking-widest uppercase"><?php echo $doc['doc_label']; ?></span>
+                    </div>
                     <?php if ($doc['status'] == 'rejected'): ?>
                     <p class="text-[10px] text-red-500 font-bold bg-red-50 p-2 rounded-xl mt-2 leading-tight">
                         <i class="ph ph-warning-circle inline-block mr-1 text-xs"></i>
@@ -347,7 +350,7 @@ $toast = get_toast_message();
                     <i class="ph ph-upload-simple text-4xl"></i>
                 </div>
                 <h3 class="text-gray-900 font-bold text-lg mb-2">No documents yet</h3>
-                <p class="text-gray-400 text-sm max-w-xs mx-auto">Upload your RDB, VAT, or TIN certificates to get started with BizShield.</p>
+                <p class="text-gray-400 text-sm max-w-xs mx-auto">Upload your required papers to get started with BizShield.</p>
             </div>
             <?php endif; ?>
         </div>
@@ -357,10 +360,11 @@ $toast = get_toast_message();
             <div class="bg-white w-full max-w-md rounded-[3rem] shadow-2xl overflow-hidden animate-zoom-in">
                 <div class="bg-primary p-12 text-white text-center">
                     <i class="ph ph-file-arrow-up text-5xl mb-4 font-bold"></i>
-                    <h2 class="text-2xl font-bold mb-1 font-serif">Upload Document</h2>
+                    <h2 class="text-2xl font-bold mb-1 font-serif">Upload <span id="modal-label">Document</span></h2>
                     <p class="text-green-100 text-[10px] font-bold uppercase tracking-widest italic">PDF, DOC, or Images</p>
                 </div>
                 <form action="" method="POST" enctype="multipart/form-data" class="p-12 space-y-8">
+                    <input type="hidden" name="doc_label" id="doc_label_input" value="General Doc">
                     <div class="group relative space-y-3">
                         <label class="text-[10px] text-primary font-black uppercase tracking-widest ml-1">Select File</label>
                         <div onclick="document.getElementById('file-input').click()" class="border-4 border-dashed border-gray-50 rounded-[2rem] p-12 text-center hover:bg-gray-50 hover:border-primary/20 transition-all cursor-pointer">
