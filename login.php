@@ -26,8 +26,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
 
             if ($user['role'] == 'admin') {
                 header("Location: admin/dashboard.php");
-            } else {
+            } else if ($user['role'] == 'org_admin') {
                 header("Location: organization/dashboard.php");
+            } else {
+                header("Location: organization/documents.php");
             }
             exit;
         }

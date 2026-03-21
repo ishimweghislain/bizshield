@@ -6,6 +6,11 @@ if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['org_admin', '
     exit;
 }
 
+if ($_SESSION['role'] === 'org_user') {
+    header("Location: documents.php");
+    exit;
+}
+
 $org_id = $_SESSION['org_id'];
 
 // Check organization status
