@@ -160,31 +160,6 @@ if (!empty($notifications)) {
                 <span class="text-xl font-bold text-primary tracking-tight">BizShield</span>
             </div>
             <nav class="space-y-1">
-                <?php if ($toast): ?>
-            <div id="toast" class="fixed top-24 right-10 z-[2000] bg-white border-l-4 border-primary p-5 rounded-2xl shadow-2xl animate-fade-in flex items-center gap-4 max-w-sm">
-                <div class="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center shrink-0">
-                    <i class="ph ph-check-circle text-xl font-bold"></i>
-                </div>
-                <p class="text-xs font-bold text-gray-700 leading-tight"><?php echo $toast['message']; ?></p>
-            </div>
-            <script>setTimeout(() => { document.getElementById('toast')?.remove(); }, 3000);</script>
-        <?php endif; ?>
-
-        <?php if (!empty($notifications) && $role === 'org_user'): ?>
-            <div class="mb-10 space-y-3" data-aos="fade-down">
-                <?php foreach ($notifications as $n): ?>
-                <div class="p-5 rounded-[2rem] border <?php echo $n['type'] == 'warning' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-primary/5 border-primary/10 text-primary'; ?> flex items-center justify-between gap-6 shadow-sm">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 <?php echo $n['type'] == 'warning' ? 'bg-red-500' : 'bg-primary'; ?> text-white rounded-2xl flex items-center justify-center shadow-lg">
-                            <i class="ph ph-<?php echo $n['type'] == 'warning' ? 'warning' : 'info'; ?> text-xl font-bold"></i>
-                        </div>
-                        <p class="text-xs font-black uppercase tracking-tight"><?php echo $n['message']; ?></p>
-                    </div>
-                    <span class="text-[10px] font-bold opacity-40 italic"><?php echo date('H:i', strtotime($n['created_at'])); ?></span>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
                 <?php if ($role === 'org_admin'): ?>
                 <a href="dashboard.php" class="sidebar-link text-gray-400 hover:text-primary hover:bg-green-50/50 flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all group">
                     <i class="ph ph-squares-four text-xl"></i>
@@ -203,7 +178,7 @@ if (!empty($notifications)) {
         </div>
         <div class="mt-auto p-8 border-t border-gray-50 bg-gray-50/20">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
+                <div class="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center font-bold">
                     <?php echo strtoupper(substr($_SESSION['username'], 0, 1)); ?>
                 </div>
                 <div><p class="text-sm font-bold text-gray-900"><?php echo $_SESSION['username']; ?></p><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest truncate w-32"><?php echo $_SESSION['org_name']; ?></p></div>
@@ -215,13 +190,35 @@ if (!empty($notifications)) {
     </aside>
 
     <main class="flex-grow p-6 lg:p-10 pb-32">
-        <?php if ($toast): ?>
-            <div id="toast" class="fixed top-10 right-4 lg:right-10 z-[2000] bg-white border border-gray-100 rounded-2xl shadow-2xl p-6 border-l-4 <?php echo $toast['type'] == 'success' ? 'border-l-green-500' : 'border-l-orange-500'; ?> flex items-center gap-4 animate-bounce-in">
-                <div class="w-10 h-10 rounded-full <?php echo $toast['type'] == 'success' ? 'bg-green-50 text-green-500' : 'bg-orange-50 text-orange-500'; ?> flex items-center justify-center"><i class="ph <?php echo $toast['type'] == 'success' ? 'ph-check-circle' : 'ph-warning-circle'; ?> text-2xl font-bold"></i></div>
-                <div><p class="text-xs text-gray-400 font-bold uppercase tracking-widest"><?php echo ucfirst($toast['type']); ?></p><p class="text-sm font-bold text-gray-700"><?php echo $toast['message']; ?></p></div>
+        <div class="max-w-7xl mx-auto">
+            <?php if ($toast): ?>
+            <div id="toast" class="fixed top-24 right-10 z-[2000] bg-white border-l-4 border-primary p-5 rounded-2xl shadow-2xl animate-fade-in flex items-center gap-4 max-w-sm">
+                <div class="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center shrink-0">
+                    <i class="ph ph-check-circle text-xl font-bold"></i>
+                </div>
+                <p class="text-xs font-bold text-gray-700 leading-tight"><?php echo $toast['message']; ?></p>
             </div>
-            <script>setTimeout(() => { document.getElementById('toast')?.remove(); }, 3000);</script>
-        <?php endif; ?>
+            <script>setTimeout(() => { document.getElementById('toast')?.remove(); }, 4000);</script>
+            <?php endif; ?>
+
+            <?php if (!empty($notifications) && $role === 'org_user'): ?>
+            <div class="mb-12 space-y-4" data-aos="fade-down">
+                <?php foreach ($notifications as $n): ?>
+                <div class="p-6 rounded-[2.5rem] border <?php echo $n['type'] == 'warning' ? 'bg-red-50/50 border-red-100 text-red-600' : 'bg-primary/5 border-primary/10 text-primary'; ?> flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 h-full w-1 bg-current opacity-20"></div>
+                    <div class="flex items-center gap-5">
+                        <div class="w-12 h-12 <?php echo $n['type'] == 'warning' ? 'bg-red-500' : 'bg-primary'; ?> text-white rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                            <i class="ph ph-<?php echo $n['type'] == 'warning' ? 'warning' : 'info'; ?> text-2xl font-bold"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-black uppercase tracking-tight"><?php echo $n['message']; ?></p>
+                            <p class="text-[10px] opacity-40 font-bold uppercase tracking-widest mt-0.5"><?php echo date('F d, H:i', strtotime($n['created_at'])); ?></p>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
 
         <header class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12" data-aos="fade-down">
             <div>
