@@ -26,11 +26,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_user'])) {
     $username = $_POST['username'];
     $email = $_POST['email'];
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $required_doc = $_POST['required_doc'];
     $role = 'org_user';
 
     try {
-        $stmt = $pdo->prepare("INSERT INTO users (organization_id, username, password, email, role, status) VALUES (?, ?, ?, ?, ?, 'active')");
-        $stmt->execute([$org_id, $username, $password, $email, $role]);
+        $stmt = $pdo->prepare("INSERT INTO users (organization_id, username, password, email, role, status, required_doc) VALUES (?, ?, ?, ?, ?, 'active', ?)");
+        $stmt->execute([$org_id, $username, $password, $email, $role, $required_doc]);
         set_toast_message("Team member created successfully.");
     } catch (Exception $e) {
         set_toast_message("Error: " . $e->getMessage(), "warning");
@@ -241,6 +242,15 @@ $toast = get_toast_message();
                     <div class="space-y-1">
                         <label class="text-[10px] text-primary font-bold ml-1 uppercase tracking-widest">Email Address</label>
                         <input type="email" name="email" required placeholder="email@company.rw" class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-primary font-bold ml-1 uppercase tracking-widest">Required Document</label>
+                        <select name="required_doc" required class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm">
+                            <option value="RDB Certificate">RDB Certificate</option>
+                            <option value="VAT/TIN Certificate">VAT/TIN Certificate</option>
+                            <option value="Sector Recommendation">Sector Recommendation</option>
+                            <option value="Profile Image">Profile Image</option>
+                        </select>
                     </div>
                     <div class="space-y-1">
                         <label class="text-[10px] text-primary font-bold ml-1 uppercase tracking-widest">Login Password</label>
