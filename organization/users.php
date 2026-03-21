@@ -7,7 +7,14 @@ if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['org_admin', '
 }
 
 $org_id = $_SESSION['org_id'];
-$can_edit = ($_SESSION['role'] === 'org_admin');
+
+// Fetch Organization Status
+$status_stmt = $pdo->prepare("SELECT status FROM organizations WHERE id = ?");
+$status_stmt->execute([$org_id]);
+$org_status = $status_stmt->fetchColumn();
+
+$is_approved = ($org_status === 'approved');
+$can_edit = ($_SESSION['role'] === 'org_admin' && $is_approved);
 
 // Handle User Creation
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_user'])) {
@@ -156,6 +163,14 @@ $toast = get_toast_message();
                 <i class="ph ph-user-plus text-xl font-bold"></i>
                 <span class="hidden lg:inline">Add Member</span>
             </button>
+            <?php else: ?>
+            <div class="bg-orange-50 text-orange-600 px-6 py-3 rounded-2xl flex items-center gap-3 border border-orange-200 shadow-sm shadow-orange-900/5">
+                <i class="ph ph-lock-key text-xl font-black"></i>
+                <div class="hidden lg:block">
+                    <p class="text-[10px] font-black uppercase tracking-widest">Awaiting Approval</p>
+                    <p class="text-[8px] font-bold opacity-80 mt-[-2px]">Admitance needed to manage team.</p>
+                </div>
+            </div>
             <?php endif; ?>
         </header>
 

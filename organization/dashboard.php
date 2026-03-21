@@ -172,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['new_doc'])) {
             </header>
 
             <!-- Rejected Docs Alart -->
-            <?php if (!empty($rejected_docs)): ?>
+            <?php if ($org['status'] != 'approved' && !empty($rejected_docs)): ?>
             <div class="mb-10" data-aos="fade-up">
                 <div class="bg-red-50 border border-red-100 rounded-[2.5rem] p-8 lg:p-12 relative overflow-hidden group">
                     <div class="absolute -right-10 -top-10 w-48 h-48 bg-red-500/5 rounded-full group-hover:scale-110 transition-transform"></div>
