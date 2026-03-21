@@ -15,7 +15,9 @@ $marquee_items = [];
 
 // 1. Add Price & Deadline (Global Announcements)
 if (!empty($settings['insurance_price'])) {
-    $marquee_items[] = "📢 Premium Coverage Registration Fee: RWF " . number_format($settings['insurance_price']);
+    $price = $settings['insurance_price'];
+    $formatted_price = is_numeric($price) ? number_format((float)$price) : $price;
+    $marquee_items[] = "📢 Premium Coverage Registration Fee: RWF " . $formatted_price;
 }
 if (!empty($settings['portal_deadline'])) {
     $marquee_items[] = "🕒 Registration Deadline: " . date('M d, Y', strtotime($settings['portal_deadline']));

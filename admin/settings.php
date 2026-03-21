@@ -8,9 +8,15 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 
 // Handle Form Submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_settings'])) {
-    $price = $_POST['insurance_price'];
+    $price = str_replace(',', '', $_POST['insurance_price']); // Remove commas if user typed them
     $deadline = $_POST['portal_deadline'];
     $disable_all = isset($_POST['disable_all']) ? 1 : 0;
+
+    if (!is_numeric($price)) {
+        set_toast_message("Invalid price. Please enter numbers only.", "warning");
+        header("Location: settings.php");
+        exit;
+    }
 
     $stmt = $pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES ('insurance_price', ?) ON DUPLICATE KEY UPDATE setting_value = ?");
     $stmt->execute([$price, $price]);
@@ -131,10 +137,16 @@ $toast = get_toast_message();
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                         <div class="space-y-4">
                             <label class="text-[10px] text-primary font-black uppercase tracking-widest">Global Insurance Fee (RWF)</label>
-                            <div class="relative">
-                                <span class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 font-black">RWF</span>
-                                <input type="text" name="insurance_price" value="<?php echo $settings['insurance_price'] ?? '30,000'; ?>" placeholder="30,000" class="w-full pl-16 pr-6 py-5 bg-gray-50 border border-gray-100 rounded-[1.5rem] focus:ring-4 focus:ring-primary/10 outline-none transition-all text-gray-700">
-                            </div>
+<div class="relative">
+    <span class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 font-black">RWF</span>
+    <?php 
+    $display_price = $settings['insurance_price'] ?? '30,000';
+    if (is_numeric(str_replace(',', '', $display_price))) {
+        $display_price = number_format((float)str_replace(',', '', $display_price));
+    }
+    ?>
+    <input type="text" name="insurance_price" value="<?php echo $display_price; ?>" placeholder="30,000" class="w-full pl-16 pr-6 py-5 bg-gray-50 border border-gray-100 rounded-[1.5rem] focus:ring-4 focus:ring-primary/10 outline-none transition-all text-gray-700">
+</div>
                             <p class="text-[10px] text-gray-400 italic">This fee will be displayed to all organizations across the platform.</p>
                         </div>
                         <div class="space-y-4">
