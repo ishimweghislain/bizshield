@@ -44,6 +44,7 @@ try {
         file_name VARCHAR(255) NOT NULL,
         file_type VARCHAR(50) NOT NULL,
         status ENUM('pending', 'verified', 'rejected') DEFAULT 'pending',
+        rejection_reason TEXT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
