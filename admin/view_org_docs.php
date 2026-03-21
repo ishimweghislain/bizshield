@@ -155,30 +155,57 @@ $toast = get_toast_message();
             <script>setTimeout(() => { document.getElementById('toast')?.remove(); }, 3000);</script>
         <?php endif; ?>
 
-        <header class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10" data-aos="fade-down">
-            <div class="flex items-center gap-5">
-                <div class="w-16 h-16 bg-primary text-white rounded-[2rem] flex items-center justify-center text-3xl font-black shadow-xl shadow-green-900/10">
+        <header class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12" data-aos="fade-down">
+            <div class="flex items-center gap-6">
+                <div class="w-20 h-20 bg-primary/5 text-primary rounded-[2.5rem] flex items-center justify-center text-4xl font-black shadow-xl border-4 border-white">
                     <?php echo strtoupper(substr($org['name'], 0, 1)); ?>
                 </div>
                 <div>
-                    <h1 class="text-2xl lg:text-3xl font-black text-gray-900"><?php echo $org['name']; ?></h1>
-                    <div class="flex flex-wrap gap-3 mt-1">
-                        <span class="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary px-3 py-1 rounded-full border border-primary/20"><?php echo $org['status']; ?></span>
-                        <span class="text-[10px] font-bold text-gray-400 flex items-center gap-1"><i class="ph ph-calendar"></i> Joined <?php echo date('M Y', strtotime($org['created_at'])); ?></span>
-                    </div>
+                    <h1 class="text-3xl font-black text-gray-900 leading-tight">
+                        <?php if ($user_id_filter && !empty($documents)): ?>
+                            Audit: <span class="text-primary italic underline uppercase"><?php echo $documents[0]['uploader']; ?></span>
+                        <?php else: ?>
+                            Org Audit: <span class="text-primary italic"><?php echo $org['name']; ?></span>
+                        <?php endif; ?>
+                    </h1>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[.3em] flex items-center gap-2 mt-1">
+                        <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+                        Reviewing compliance documents
+                    </p>
                 </div>
             </div>
-            <div class="flex gap-3">
-                 <a href="organizations.php" class="lg:hidden bg-white p-4 rounded-2xl shadow-sm border border-gray-100 text-gray-400"><i class="ph ph-arrow-left text-xl"></i></a>
-                 <div class="bg-white px-6 py-4 rounded-[1.5rem] border border-gray-100 shadow-sm flex items-center gap-4">
-                    <div class="text-right">
-                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Total Staff</p>
-                        <p class="text-xl font-black text-primary"><?php echo count($users); ?></p>
-                    </div>
-                    <div class="w-10 h-10 bg-primary/5 rounded-xl flex items-center justify-center text-primary"><i class="ph ph-users-three text-2xl"></i></div>
-                 </div>
+            <div class="flex items-center gap-3">
+                <?php if ($user_id_filter): ?>
+                <a href="view_org_docs.php?id=<?php echo $org_id; ?>" class="bg-red-50 text-red-500 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-red-100 transition-all border border-red-100 shadow-xl shadow-red-900/10">
+                    <i class="ph ph-x-circle text-xl"></i> Clear Selection
+                </a>
+                <?php endif; ?>
+                <a href="organizations.php" class="bg-white border border-gray-100 shadow-soft px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-gray-400 hover:text-primary transition-all flex items-center gap-2">
+                    <i class="ph ph-buildings text-xl"></i> All Orgs
+                </a>
             </div>
         </header>
+
+        <!-- Personnel Filter -->
+        <div class="mb-14" data-aos="fade-up">
+            <h2 class="text-[10px] font-black text-gray-300 uppercase tracking-[.4em] mb-6 flex items-center gap-4">
+                <span class="w-12 h-[2px] bg-primary/20"></span>
+                Select Team Member
+            </h2>
+            <div class="flex flex-wrap gap-4">
+                <?php foreach ($team_members as $m): ?>
+                <a href="?id=<?php echo $org_id; ?>&user_id=<?php echo $m['id']; ?>" class="group flex items-center gap-4 px-6 py-4 bg-white border <?php echo ($user_id_filter == $m['id']) ? 'border-primary ring-4 ring-primary/5 shadow-2xl scale-105' : 'border-gray-50'; ?> rounded-2xl hover:border-primary/50 hover:shadow-xl transition-all duration-500">
+                    <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 group-hover:bg-primary group-hover:text-white transition-all duration-500">
+                        <i class="ph ph-user text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-black text-gray-900 uppercase tracking-tighter truncate w-32"><?php echo $m['username']; ?></h3>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Compliance Task</p>
+                    </div>
+                </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-10">
             <!-- Documents Session -->
