@@ -8,6 +8,34 @@ if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['org_admin', '
 
 $org_id = $_SESSION['org_id'];
 $user_id = $_SESSION['user_id'];
+$role = $_SESSION['role'];
+
+// Fetch User Requirement (for org_user)
+$required_doc = null;
+if ($role === 'org_user') {
+    $stmt = $pdo->prepare("SELECT required_doc FROM users WHERE id = ?");
+    $stmt->execute([$user_id]);
+    $required_doc = $stmt->fetchColumn();
+}
+
+// Handle Organization Admin Approval/Rejection
+if ($role === 'org_admin' && isset($_GET['action']) && isset($_GET['doc_id'])) {
+    $doc_id = $_GET['doc_id'];
+    $action = $_GET['action'];
+    $reason = $_GET['reason'] ?? 'Needs improvement.';
+
+    if ($action === 'approve') {
+        $stmt = $pdo->prepare("UPDATE documents SET status = 'verified' WHERE id = ? AND organization_id = ?");
+        $stmt->execute([$doc_id, $org_id]);
+        set_toast_message("Document verified and sent for global approval.");
+    } elseif ($action === 'reject') {
+        $stmt = $pdo->prepare("UPDATE documents SET status = 'rejected', rejection_reason = ? WHERE id = ? AND organization_id = ?");
+        $stmt->execute([$reason, $doc_id, $org_id]);
+        set_toast_message("Document rejected.", "warning");
+    }
+    header("Location: documents.php");
+    exit;
+}
 
 // Handle Document Upload
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['upload_doc'])) {
@@ -22,7 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['upload_doc'])) {
         
         if (move_uploaded_file($_FILES['document']['tmp_name'], $target_file)) {
             $db_file_path = 'uploads/docs/' . $new_file_name;
-            $stmt = $pdo->prepare("INSERT INTO documents (organization_id, user_id, file_path, file_name, file_type) VALUES (?, ?, ?, ?, ?)");
+            // If uploaded by staff, set to pending. If uploaded by admin, set to verified? 
+            // Better: always pending, but org_admin can verify it.
+            $stmt = $pdo->prepare("INSERT INTO documents (organization_id, user_id, file_path, file_name, file_type, status) VALUES (?, ?, ?, ?, ?, 'pending')");
             $stmt->execute([$org_id, $user_id, $db_file_path, $file_name, $file_ext]);
             set_toast_message("Document uploaded successfully.");
         }
@@ -33,9 +63,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['upload_doc'])) {
     exit;
 }
 
-// Fetch my organization documents
-$stmt = $pdo->prepare("SELECT d.*, u.username FROM documents d JOIN users u ON d.user_id = u.id WHERE d.organization_id = ? ORDER BY d.created_at DESC");
-$stmt->execute([$org_id]);
+// Fetch documents
+// org_admin sees all. org_user only sees their own.
+if ($role === 'org_admin') {
+    $stmt = $pdo->prepare("SELECT d.*, u.username FROM documents d JOIN users u ON d.user_id = u.id WHERE d.organization_id = ? ORDER BY d.created_at DESC");
+    $stmt->execute([$org_id]);
+} else {
+    $stmt = $pdo->prepare("SELECT d.*, u.username FROM documents d JOIN users u ON d.user_id = u.id WHERE d.user_id = ? ORDER BY d.created_at DESC");
+    $stmt->execute([$user_id]);
+}
 $documents = $stmt->fetchAll();
 
 $toast = get_toast_message();
@@ -75,6 +111,7 @@ $toast = get_toast_message();
                 <span class="text-xl font-bold text-primary tracking-tight">BizShield</span>
             </div>
             <nav class="space-y-1">
+                <?php if ($role === 'org_admin'): ?>
                 <a href="dashboard.php" class="sidebar-link text-gray-400 hover:text-primary hover:bg-green-50/50 flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all group">
                     <i class="ph ph-squares-four text-xl"></i>
                     <span>Dashboard</span>
@@ -83,6 +120,7 @@ $toast = get_toast_message();
                     <i class="ph ph-users text-xl"></i>
                     <span>Team Members</span>
                 </a>
+                <?php endif; ?>
                 <a href="documents.php" class="sidebar-link active flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all group">
                     <i class="ph ph-files text-xl"></i>
                     <span>My Documents</span>
@@ -111,14 +149,19 @@ $toast = get_toast_message();
             <script>setTimeout(() => { document.getElementById('toast')?.remove(); }, 3000);</script>
         <?php endif; ?>
 
-        <header class="flex items-center justify-between mb-10" data-aos="fade-down">
+        <header class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10" data-aos="fade-down">
             <div>
-                <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-1">Upload Certificates</h1>
-                <p class="text-xs lg:text-sm text-gray-400 font-medium tracking-tighter">Business papers for insurance coverage.</p>
+                <?php if ($role === 'org_user'): ?>
+                <h1 class="text-xl lg:text-3xl font-black text-gray-900 mb-1 italic">Personal Task: Upload <span class="text-primary font-black underline"><?php echo $required_doc; ?></span></h1>
+                <p class="text-[10px] lg:text-xs text-red-500 font-bold uppercase tracking-widest">Required by your Organization Admin</p>
+                <?php else: ?>
+                <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-1">Team Document Review</h1>
+                <p class="text-xs lg:text-sm text-gray-400 font-medium tracking-tighter">Review and verify papers uploaded by your staff.</p>
+                <?php endif; ?>
             </div>
             <button onclick="document.getElementById('uploadModal').classList.remove('hidden')" class="bg-primary text-white p-3 lg:px-6 lg:py-3 rounded-2xl font-bold text-sm flex items-center gap-2 hover:bg-primary-light transition-all shadow-lg active:scale-[0.98]">
                 <i class="ph ph-upload-simple text-xl font-bold"></i>
-                <span class="hidden lg:inline">Upload New Doc</span>
+                <span class="hidden lg:inline"><?php echo $role === 'org_user' ? 'Upload Task Now' : 'Upload New Doc'; ?></span>
             </button>
         </header>
 
@@ -133,6 +176,7 @@ $toast = get_toast_message();
                     <?php 
                     $status_classes = [
                         'pending' => 'bg-orange-50 text-orange-600 border-orange-100',
+                        'verified' => 'bg-blue-50 text-blue-600 border-blue-100',
                         'approved' => 'bg-green-50 text-green-600 border-green-100',
                         'rejected' => 'bg-red-50 text-red-600 border-red-100'
                     ];
@@ -143,7 +187,7 @@ $toast = get_toast_message();
                     </span>
                 </div>
 
-                <div class="flex items-center justify-between mb-4 mt-2 <?php echo $is_rejected ? 'blur-[1px]' : ''; ?>">
+                <div class="flex items-center justify-between mb-4 mt-2 <?php echo $is_rejected ? 'blur-[2px]' : ''; ?>">
                     <div class="w-14 h-14 bg-gray-50 rounded-3xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-sm">
                         <?php 
                         $ext = strtolower($doc['file_type']);
@@ -160,6 +204,14 @@ $toast = get_toast_message();
                         <a href="../<?php echo $doc['file_path']; ?>" target="_blank" class="w-10 h-10 bg-white border border-gray-50 text-gray-400 rounded-full flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-sm">
                             <i class="ph ph-eye font-bold"></i>
                         </a>
+                        <?php if ($role === 'org_admin' && $doc['status'] === 'pending'): ?>
+                        <a href="?action=approve&doc_id=<?php echo $doc['id']; ?>" class="w-10 h-10 bg-green-50 text-green-600 rounded-full flex items-center justify-center hover:bg-green-500 hover:text-white transition-all shadow-sm">
+                            <i class="ph ph-check-bold font-bold"></i>
+                        </a>
+                        <button onclick="rejectDoc(<?php echo $doc['id']; ?>)" class="w-10 h-10 bg-red-50 text-red-600 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm">
+                            <i class="ph ph-x-bold font-bold"></i>
+                        </button>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="space-y-1 mb-8">
@@ -223,6 +275,15 @@ $toast = get_toast_message();
     </main>
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script>AOS.init({ duration: 800, once: true });</script>
+    <script>
+        AOS.init({ duration: 800, once: true });
+        
+        function rejectDoc(docId) {
+            const reason = prompt("Enter rejection reason:");
+            if (reason) {
+                window.location.href = `?action=reject&doc_id=${docId}&reason=${encodeURIComponent(reason)}`;
+            }
+        }
+    </script>
 </body>
 </html>

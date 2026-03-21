@@ -173,13 +173,15 @@ $toast = get_toast_message();
 
                          <div class="absolute top-4 right-4 z-20">
                             <?php 
-                            $status_classes = [
-                                'pending' => 'bg-orange-50 text-orange-600',
-                                'approved' => 'bg-green-50 text-green-600',
-                                'rejected' => 'bg-red-50 text-red-600'
-                            ];
-                            ?>
-                            <span class="text-[8px] font-black uppercase px-2 py-1 rounded-full <?php echo $status_classes[$doc['status']] ?? 'bg-gray-50'; ?>">
+                    $status_colors = [
+                        'pending' => 'bg-orange-50 text-orange-600 border-orange-100',
+                        'verified' => 'bg-blue-50 text-blue-600 border-blue-100',
+                        'approved' => 'bg-green-50 text-green-600 border-green-100',
+                        'rejected' => 'bg-red-50 text-red-600 border-red-100'
+                    ];
+                    $status_class = $status_colors[$doc['status']] ?? 'bg-gray-100 text-gray-400';
+                    ?>
+        <span class="text-[8px] font-black uppercase px-2 py-1 rounded-full border <?php echo $status_class; ?>">
                                 <?php echo $doc['status']; ?>
                             </span>
                          </div>
