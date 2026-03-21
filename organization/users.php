@@ -167,8 +167,8 @@ $toast = get_toast_message();
             <div class="bg-orange-50 text-orange-600 px-6 py-3 rounded-2xl flex items-center gap-3 border border-orange-200 shadow-sm shadow-orange-900/5">
                 <i class="ph ph-lock-key text-xl font-black"></i>
                 <div class="hidden lg:block">
-                    <p class="text-[10px] font-black uppercase tracking-widest">Awaiting Approval</p>
-                    <p class="text-[8px] font-bold opacity-80 mt-[-2px]">Admitance needed to manage team.</p>
+                    <p class="text-[10px] font-black uppercase tracking-widest">Awaiting Admission</p>
+                    <p class="text-[8px] font-bold opacity-80 mt-[-2px] italic">Access granted only after global approval.</p>
                 </div>
             </div>
             <?php endif; ?>

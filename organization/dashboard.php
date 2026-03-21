@@ -45,6 +45,16 @@ $rejected_docs_stmt = $pdo->prepare("SELECT * FROM documents WHERE organization_
 $rejected_docs_stmt->execute([$org_id]);
 $rejected_docs = $rejected_docs_stmt->fetchAll();
 
+// Check for pending docs
+$pending_docs_stmt = $pdo->prepare("SELECT COUNT(*) FROM documents WHERE organization_id = ? AND status = 'pending'");
+$pending_docs_stmt->execute([$org_id]);
+$has_pending_docs = $pending_docs_stmt->fetchColumn() > 0;
+
+// Check for approved docs
+$approved_docs_stmt = $pdo->prepare("SELECT COUNT(*) FROM documents WHERE organization_id = ? AND status = 'approved'");
+$approved_docs_stmt->execute([$org_id]);
+$has_approved_docs = $approved_docs_stmt->fetchColumn() > 0;
+
 $toast = get_toast_message();
 
 // Handle new upload from dashboard if needed
@@ -171,45 +181,85 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['new_doc'])) {
                 </div>
             </header>
 
-            <!-- Rejected Docs Alart -->
-            <?php if ($org['status'] != 'approved' && !empty($rejected_docs)): ?>
-            <div class="mb-10" data-aos="fade-up">
-                <div class="bg-red-50 border border-red-100 rounded-[2.5rem] p-8 lg:p-12 relative overflow-hidden group">
-                    <div class="absolute -right-10 -top-10 w-48 h-48 bg-red-500/5 rounded-full group-hover:scale-110 transition-transform"></div>
-                    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                        <div>
-                            <div class="flex items-center gap-3 mb-4">
-                                <div class="w-10 h-10 bg-red-500 text-white rounded-xl flex items-center justify-center font-black">
-                                    <i class="ph ph-warning-octagon text-xl"></i>
+            <!-- Status Alert System -->
+            <?php if ($org['status'] != 'approved'): ?>
+                <?php if (!empty($rejected_docs)): ?>
+                <!-- Rejection Alert -->
+                <div class="mb-10" data-aos="fade-up">
+                    <div class="bg-red-50 border border-red-100 rounded-[2.5rem] p-8 lg:p-12 relative overflow-hidden group">
+                        <div class="absolute -right-10 -top-10 w-48 h-48 bg-red-500/5 rounded-full group-hover:scale-110 transition-transform"></div>
+                        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-10 h-10 bg-red-500 text-white rounded-xl flex items-center justify-center font-black animate-pulse">
+                                        <i class="ph ph-warning-octagon text-xl"></i>
+                                    </div>
+                                    <h2 class="text-2xl font-black text-red-600 uppercase tracking-tight">Documents Rejected</h2>
                                 </div>
-                                <h2 class="text-2xl font-black text-red-600">Action Required</h2>
+                                <p class="text-sm text-red-800 font-medium max-w-lg leading-relaxed mb-6">Your organization's admission is on hold because some documents were rejected. Please review the reasons and re-upload.</p>
+                                
+                                <div class="space-y-4 max-w-xl">
+                                    <?php foreach ($rejected_docs as $rd): ?>
+                                    <div class="bg-white/50 backdrop-blur-sm border border-red-200/50 p-6 rounded-2xl">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <i class="ph ph-file-x text-red-500 font-bold"></i>
+                                            <p class="text-[10px] text-red-400 font-black uppercase tracking-[.2em]"><?php echo $rd['file_name']; ?></p>
+                                        </div>
+                                        <p class="text-xs font-bold text-gray-700 italic">"<?php echo $rd['rejection_reason']; ?>"</p>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
                             </div>
-                            <p class="text-sm text-red-800 font-medium max-w-lg leading-relaxed mb-6">Your organization's admission is on hold because some documents were rejected by the administrator.</p>
                             
-                            <div class="space-y-4">
-                                <?php foreach ($rejected_docs as $rd): ?>
-                                <div class="bg-white/50 backdrop-blur-sm border border-red-200/50 p-6 rounded-2xl">
-                                    <p class="text-[10px] text-red-400 font-black uppercase tracking-[.2em] mb-1">REASON FOR <?php echo strtoupper($rd['file_name']); ?></p>
-                                    <p class="text-xs font-bold text-gray-700 italic">"<?php echo $rd['rejection_reason']; ?>"</p>
-                                </div>
-                                <?php endforeach; ?>
+                            <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-red-100 w-full lg:w-96 shrink-0">
+                                <h3 class="text-sm font-black text-gray-900 mb-4 uppercase tracking-widest flex items-center gap-2">
+                                    <i class="ph ph-upload-simple"></i> Re-upload Document
+                                </h3>
+                                <form action="" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                    <label class="group border-2 border-dashed border-red-100 rounded-2xl p-10 flex flex-col items-center justify-center cursor-pointer hover:bg-red-50 transition-all border-spacing-4">
+                                        <i class="ph ph-cloud-arrow-up text-4xl text-red-300 group-hover:scale-110 transition-transform mb-3"></i>
+                                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Click to Select<br>New Certificate</span>
+                                        <input type="file" name="new_doc" required class="hidden" onchange="this.form.submit()">
+                                    </label>
+                                    <p class="text-[8px] text-gray-400 text-center uppercase font-bold tracking-[.3em]">PDF, JPG, PNG up to 10MB</p>
+                                </form>
                             </div>
-                        </div>
-                        
-                        <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-red-100 w-full lg:w-96">
-                            <h3 class="text-sm font-black text-gray-900 mb-4 uppercase tracking-widest">Re-upload Documents</h3>
-                            <form action="" method="POST" enctype="multipart/form-data" class="space-y-4">
-                                <label class="border-2 border-dashed border-red-100 rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-all">
-                                    <i class="ph ph-cloud-arrow-up text-3xl text-red-400 mb-2"></i>
-                                    <span class="text-[10px] font-bold text-gray-400 uppercase">Click to Select File</span>
-                                    <input type="file" name="new_doc" required class="hidden" onchange="this.form.submit()">
-                                </label>
-                                <p class="text-[8px] text-gray-400 text-center uppercase font-bold tracking-widest">Supports PDF, JPG, PNG up to 10MB</p>
-                            </form>
                         </div>
                     </div>
                 </div>
-            </div>
+                <?php elseif ($has_approved_docs && !$has_pending_docs): ?>
+                <!-- Docs Approved, Org Admission Pending -->
+                <div class="mb-10" data-aos="fade-up">
+                    <div class="bg-orange-50 border border-orange-100 rounded-[2.5rem] p-10 lg:p-14 relative overflow-hidden group">
+                        <div class="absolute -right-10 -top-10 w-64 h-64 bg-orange-500/5 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
+                        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center gap-8">
+                            <div class="w-16 h-16 bg-orange-500 text-white rounded-3xl flex items-center justify-center text-3xl font-black shadow-lg shadow-orange-900/20">
+                                <i class="ph ph-circle-dashed animate-spin"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-black text-orange-600 mb-2 uppercase tracking-tight">Documents Verified ✅</h2>
+                                <p class="text-sm text-gray-600 font-medium max-w-xl leading-relaxed">Your business papers are now successfully verified! You are now only awaiting the **Final Admission** from the global administrator. You will be notified once complete.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php else: ?>
+                <!-- General Pending Alert -->
+                <div class="mb-10" data-aos="fade-up">
+                    <div class="bg-blue-50 border border-blue-100 rounded-[2.5rem] p-10 lg:p-14 relative overflow-hidden group">
+                        <div class="absolute -right-10 -top-10 w-64 h-64 bg-blue-500/5 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
+                        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center gap-8">
+                            <div class="w-16 h-16 bg-blue-500 text-white rounded-3xl flex items-center justify-center text-3xl font-black shadow-lg shadow-blue-900/20">
+                                <i class="ph ph-hourglass-medium animate-pulse"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-black text-blue-600 mb-2 uppercase tracking-tight">Review in Progress 🕒</h2>
+                                <p class="text-sm text-gray-600 font-medium max-w-xl leading-relaxed">Our administrative team is currently reviewing your uploaded papers. This usually takes 24-48 hours. Please check back soon!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
             <?php endif; ?>
 
             <!-- Stats Grid -->
