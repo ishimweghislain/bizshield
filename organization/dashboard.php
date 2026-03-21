@@ -124,7 +124,8 @@ $deadline = $deadline_stmt->fetchColumn() ?: "Not Set";
                 <div class="flex items-center gap-4">
                     <div class="px-6 py-3 bg-white border border-gray-100 rounded-2xl shadow-sm text-center">
                         <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-0.5">Insurance Price</p>
-                        <p class="text-sm font-bold text-primary">RWF <?php echo $price; ?></p>
+                        <?php $show_price = is_numeric($price) ? number_format((float)$price) : $price; ?>
+                        <p class="text-sm font-bold text-primary">RWF <?php echo $show_price; ?></p>
                     </div>
                     <div class="px-6 py-3 bg-white border border-gray-100 rounded-2xl shadow-sm text-center">
                         <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-0.5">Entry Deadline</p>
