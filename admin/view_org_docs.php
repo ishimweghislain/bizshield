@@ -196,7 +196,11 @@ $toast = get_toast_message();
                          </div>
                          
                          <div class="flex items-center gap-2 pt-4 border-t border-gray-50">
-                            <a href="../<?php echo $doc['file_path']; ?>" target="_blank" class="flex-grow bg-primary text-white text-[10px] font-black py-3 rounded-xl text-center hover:bg-primary-light transition-all uppercase tracking-widest shadow-lg shadow-green-900/10">View File</a>
+                            <div class="flex gap-2">
+                                <a href="../organization/view_doc.php?id=<?php echo $doc['id']; ?>" target="_blank" class="w-10 h-10 bg-white border border-gray-50 text-gray-400 rounded-full flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-sm">
+                                    <i class="ph ph-eye font-bold"></i>
+                                </a>
+                            </div>
                             <?php if ($doc['status'] == 'pending'): ?>
                             <a href="?id=<?php echo $org_id; ?>&doc_id=<?php echo $doc['id']; ?>&doc_action=approve" class="p-3 bg-green-50 text-green-600 rounded-xl hover:bg-green-500 hover:text-white transition-all"><i class="ph ph-check-bold font-bold"></i></a>
                             <button onclick="rejectDoc(<?php echo $doc['id']; ?>)" class="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-500 hover:text-white transition-all"><i class="ph ph-x-bold font-bold"></i></button>
