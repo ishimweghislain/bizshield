@@ -16,20 +16,36 @@ $org_id = $_GET['id'];
 // Handle Document Actions
 if (isset($_GET['doc_action']) && isset($_GET['doc_id'])) {
     $doc_id = $_GET['doc_id'];
-    $action = $_GET['doc_action'];
+    $doc_action = $_GET['doc_action']; // Renamed from $action for clarity with the new logic
+    $reason = $_GET['reason'] ?? 'Document does not meet requirements.'; // Default reason for rejection
+
+    // Fetch Target User ID and document label for notification
+    $target_stmt = $pdo->prepare("SELECT user_id, doc_label FROM documents WHERE id = ?");
+    $target_stmt->execute([$doc_id]);
+    $target_info = $target_stmt->fetch();
+    $target_user_id = $target_info['user_id'];
+    $label = $target_info['doc_label'];
     
-    if ($action == 'approve') {
+    if ($doc_action == 'approve') {
         $stmt = $pdo->prepare("UPDATE documents SET status = 'approved' WHERE id = ?");
         $stmt->execute([$doc_id]);
         set_toast_message("Document approved.");
-    } elseif ($action == 'reject') {
-        $reason = $_GET['reason'] ?? 'Document does not meet requirements.';
+
+        // Notify Team Member
+        $notif = "Congratulations! Your document '$label' has been approved by the global administrator.";
+        $pdo->prepare("INSERT INTO notifications (user_id, message, type) VALUES (?, ?, 'info')")->execute([$target_user_id, $notif]);
+
+    } elseif ($doc_action == 'reject') {
         $stmt = $pdo->prepare("UPDATE documents SET status = 'rejected', rejection_reason = ? WHERE id = ?");
         $stmt->execute([$reason, $doc_id]);
         
-        // Notify Org
+        // Notify Org (existing)
         $stmt = $pdo->prepare("INSERT INTO notifications (organization_id, message, type) VALUES (?, ?, 'warning')");
         $stmt->execute([$org_id, "Your document was rejected: " . $reason]);
+
+        // Notify Team Member (new)
+        $notif = "CRITICAL: Your document '$label' was rejected by the global admin: $reason";
+        $pdo->prepare("INSERT INTO notifications (user_id, message, type) VALUES (?, ?, 'warning')")->execute([$target_user_id, $notif]);
         
         set_toast_message("Document rejected.", "warning");
     }
@@ -47,10 +63,24 @@ if (!$org) {
     exit;
 }
 
-// Fetch documents
-$stmt = $pdo->prepare("SELECT d.*, u.username as uploader FROM documents d JOIN users u ON d.user_id = u.id WHERE d.organization_id = ? ORDER BY d.created_at DESC");
-$stmt->execute([$org_id]);
+$user_id_filter = $_GET['user_id'] ?? null;
+
+// Fetch documents (with optional filter)
+$sql = "SELECT d.*, u.username as uploader FROM documents d JOIN users u ON d.user_id = u.id WHERE d.organization_id = ?";
+if ($user_id_filter) {
+    $sql .= " AND d.user_id = ? ORDER BY d.created_at DESC";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$org_id, $user_id_filter]);
+} else {
+    $stmt = $pdo->prepare($sql . " ORDER BY d.created_at DESC");
+    $stmt->execute([$org_id]);
+}
 $documents = $stmt->fetchAll();
+
+// Fetch unique people in this organization for the picker
+$stmt = $pdo->prepare("SELECT id, username FROM users WHERE organization_id = ? AND role = 'org_user'");
+$stmt->execute([$org_id]);
+$team_members = $stmt->fetchAll();
 
 // Fetch users
 $stmt = $pdo->prepare("SELECT * FROM users WHERE organization_id = ? ORDER BY role DESC");
