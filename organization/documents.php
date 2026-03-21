@@ -44,17 +44,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['upload_doc'])) {
         if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
         
         $file_name = $_FILES['document']['name'];
+        $doc_label = $_POST['doc_label'] ?? 'General Doc';
         $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
-        $new_file_name = "org_" . $org_id . "_user_" . $user_id . "_" . time() . "." . $file_ext;
+        $new_file_name = "org_" . $org_id . "_user_" . $user_id . "_label_" . str_replace(' ', '_', $doc_label) . "_" . time() . "." . $file_ext;
         $target_file = $upload_dir . $new_file_name;
         
         if (move_uploaded_file($_FILES['document']['tmp_name'], $target_file)) {
             $db_file_path = 'uploads/docs/' . $new_file_name;
-            // If uploaded by staff, set to pending. If uploaded by admin, set to verified? 
-            // Better: always pending, but org_admin can verify it.
-            $stmt = $pdo->prepare("INSERT INTO documents (organization_id, user_id, file_path, file_name, file_type, status) VALUES (?, ?, ?, ?, ?, 'pending')");
-            $stmt->execute([$org_id, $user_id, $db_file_path, $file_name, $file_ext]);
-            set_toast_message("Document uploaded successfully.");
+            $stmt = $pdo->prepare("INSERT INTO documents (organization_id, user_id, file_path, file_name, file_type, status, doc_label) VALUES (?, ?, ?, ?, ?, 'pending', ?)");
+            $stmt->execute([$org_id, $user_id, $db_file_path, $file_name, $file_ext, $doc_label]);
+            set_toast_message("Document for $doc_label uploaded successfully.");
         }
     } else {
         set_toast_message("Error uploading file.", "warning");
@@ -64,15 +63,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['upload_doc'])) {
 }
 
 // Fetch documents
-// org_admin sees all. org_user only sees their own.
+$id_doc = null;
+$contract_doc = null;
+if ($role === 'org_user') {
+    // Specifically fetch ID and Work Contract for the user
+    $stmt = $pdo->prepare("SELECT * FROM documents WHERE user_id = ? AND doc_label = 'ID' ORDER BY created_at DESC LIMIT 1");
+    $stmt->execute([$user_id]);
+    $id_doc = $stmt->fetch();
+
+    $stmt = $pdo->prepare("SELECT * FROM documents WHERE user_id = ? AND doc_label = 'Work Contract' ORDER BY created_at DESC LIMIT 1");
+    $stmt->execute([$user_id]);
+    $contract_doc = $stmt->fetch();
+}
+
 if ($role === 'org_admin') {
     $stmt = $pdo->prepare("SELECT d.*, u.username FROM documents d JOIN users u ON d.user_id = u.id WHERE d.organization_id = ? ORDER BY d.created_at DESC");
     $stmt->execute([$org_id]);
+    $documents = $stmt->fetchAll();
 } else {
+    // For org_user, we already fetched specific ones, but let's also fetch any other general docs if they exist
     $stmt = $pdo->prepare("SELECT d.*, u.username FROM documents d JOIN users u ON d.user_id = u.id WHERE d.user_id = ? ORDER BY d.created_at DESC");
     $stmt->execute([$user_id]);
+    $documents = $stmt->fetchAll();
 }
-$documents = $stmt->fetchAll();
 
 $toast = get_toast_message();
 ?>

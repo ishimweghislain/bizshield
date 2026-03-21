@@ -248,15 +248,20 @@ $toast = get_toast_message();
                         <label class="text-[10px] text-primary font-bold ml-1 uppercase tracking-widest">Email Address</label>
                         <input type="email" name="email" required placeholder="email@company.rw" class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm">
                     </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] text-primary font-bold ml-1 uppercase tracking-widest">Required Document</label>
-                        <select name="required_doc" required class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm">
-                            <option value="RDB Certificate">RDB Certificate</option>
-                            <option value="VAT/TIN Certificate">VAT/TIN Certificate</option>
-                            <option value="Sector Recommendation">Sector Recommendation</option>
-                            <option value="Profile Image">Profile Image</option>
-                        </select>
+                    <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10">
+                        <label class="text-[10px] text-primary font-black ml-1 uppercase tracking-widest block mb-4 italic">Auto-Required Documents:</label>
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm">
+                                <i class="ph ph-identification-card text-primary font-bold"></i>
+                                <span class="text-[10px] font-black text-gray-600 uppercase">Personal ID</span>
+                            </div>
+                            <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm">
+                                <i class="ph ph-certificate text-primary font-bold"></i>
+                                <span class="text-[10px] font-black text-gray-600 uppercase">Work Contract</span>
+                            </div>
+                        </div>
                     </div>
+                    <input type="hidden" name="required_doc" value="ID & Work Contract">
                     <div class="space-y-1">
                         <label class="text-[10px] text-primary font-bold ml-1 uppercase tracking-widest">Login Password</label>
                         <input type="password" name="password" required placeholder="••••••••" class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm">
