@@ -18,22 +18,41 @@ if ($role === 'org_user') {
     $required_doc = $stmt->fetchColumn();
 }
 
+$user_id_filter = $_GET['user_id'] ?? null;
+
 // Handle Organization Admin Approval/Rejection
 if ($role === 'org_admin' && isset($_GET['action']) && isset($_GET['doc_id'])) {
     $doc_id = $_GET['doc_id'];
     $action = $_GET['action'];
     $reason = $_GET['reason'] ?? 'Needs improvement.';
 
+    // Fetch Target User ID for notification
+    $target_stmt = $pdo->prepare("SELECT user_id, doc_label FROM documents WHERE id = ?");
+    $target_stmt->execute([$doc_id]);
+    $target_info = $target_stmt->fetch();
+    $target_user_id = $target_info['user_id'];
+    $label = $target_info['doc_label'];
+
     if ($action === 'approve') {
         $stmt = $pdo->prepare("UPDATE documents SET status = 'verified' WHERE id = ? AND organization_id = ?");
         $stmt->execute([$doc_id, $org_id]);
+        
+        // Notify Team Member
+        $notif = "Your document '$label' has been verified by the organization admin.";
+        $pdo->prepare("INSERT INTO notifications (user_id, message, type) VALUES (?, ?, 'info')")->execute([$target_user_id, $notif]);
+        
         set_toast_message("Document verified and sent for global approval.");
     } elseif ($action === 'reject') {
         $stmt = $pdo->prepare("UPDATE documents SET status = 'rejected', rejection_reason = ? WHERE id = ? AND organization_id = ?");
         $stmt->execute([$reason, $doc_id, $org_id]);
+
+        // Notify Team Member
+        $notif = "Attention! Your document '$label' was rejected: $reason";
+        $pdo->prepare("INSERT INTO notifications (user_id, message, type, organization_id) VALUES (?, ?, 'warning', ?)")->execute([$target_user_id, $notif, $org_id]);
+
         set_toast_message("Document rejected.", "warning");
     }
-    header("Location: documents.php");
+    header("Location: documents.php" . ($user_id_filter ? "?user_id=$user_id_filter" : ""));
     exit;
 }
 
@@ -77,17 +96,33 @@ if ($role === 'org_user') {
 }
 
 if ($role === 'org_admin') {
-    $stmt = $pdo->prepare("SELECT d.*, u.username FROM documents d JOIN users u ON d.user_id = u.id WHERE d.organization_id = ? ORDER BY d.created_at DESC");
-    $stmt->execute([$org_id]);
-    $documents = $stmt->fetchAll();
+    $sql = "SELECT d.*, u.username FROM documents d JOIN users u ON d.user_id = u.id WHERE d.organization_id = ?";
+    if ($user_id_filter) {
+        $sql .= " AND d.user_id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$org_id, $user_id_filter]);
+    } else {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$org_id]);
+    }
 } else {
-    // For org_user, we already fetched specific ones, but let's also fetch any other general docs if they exist
+    // For org_user, always only their own
     $stmt = $pdo->prepare("SELECT d.*, u.username FROM documents d JOIN users u ON d.user_id = u.id WHERE d.user_id = ? ORDER BY d.created_at DESC");
     $stmt->execute([$user_id]);
-    $documents = $stmt->fetchAll();
 }
+$documents = $stmt->fetchAll();
 
 $toast = get_toast_message();
+
+// Fetch Notifications for the user
+$stmt = $pdo->prepare("SELECT * FROM notifications WHERE (user_id = ? OR (organization_id = ? AND user_id IS NULL)) AND is_read = 0 ORDER BY created_at DESC");
+$stmt->execute([$user_id, $org_id]);
+$notifications = $stmt->fetchAll();
+
+// Mark notifications as read
+if (!empty($notifications)) {
+    $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ?")->execute([$user_id]);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -172,15 +207,32 @@ $toast = get_toast_message();
                     Complete your profile documentation
                 </p>
                 <?php else: ?>
-                <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-1">Team Document Review</h1>
+                <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-1">
+                    <?php if ($user_id_filter && !empty($documents)): ?>
+                        Documents for <span class="text-primary italic underline uppercase"><?php echo $documents[0]['username']; ?></span>
+                    <?php else: ?>
+                        Team Document Review
+                    <?php endif; ?>
+                </h1>
                 <p class="text-xs lg:text-sm text-gray-400 font-medium tracking-tighter">Review and verify papers uploaded by your staff.</p>
+                <?php if ($user_id_filter): ?>
+                <a href="documents.php" class="inline-flex items-center gap-2 mt-4 text-[10px] font-black text-red-500 uppercase tracking-widest bg-red-50 px-4 py-2 rounded-xl border border-red-100 hover:bg-red-100 transition-all">
+                    <i class="ph ph-x-circle"></i> Clear Selection
+                </a>
                 <?php endif; ?>
+<?php endif; ?>
             </div>
             <?php if ($role === 'org_admin'): ?>
-            <button onclick="openUploadModal('General Doc')" class="bg-primary text-white p-3 lg:px-6 lg:py-3 rounded-2xl font-bold text-sm flex items-center gap-2 hover:bg-primary-light transition-all shadow-lg active:scale-[0.98]">
-                <i class="ph ph-upload-simple text-xl font-bold"></i>
-                <span class="hidden lg:inline">Upload New Doc</span>
-            </button>
+            <div class="flex items-center gap-3">
+                <a href="users.php" class="bg-gray-50 text-gray-500 px-6 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 hover:bg-gray-100 transition-all">
+                    <i class="ph ph-users text-xl"></i>
+                    <span class="hidden lg:inline">Manage Team</span>
+                </a>
+                <button onclick="openUploadModal('General Doc')" class="bg-primary text-white p-3 lg:px-6 lg:py-3 rounded-2xl font-bold text-sm flex items-center gap-2 hover:bg-primary-light transition-all shadow-lg active:scale-[0.98]">
+                    <i class="ph ph-upload-simple text-xl font-bold"></i>
+                    <span class="hidden lg:inline">Upload New Doc</span>
+                </button>
+            </div>
             <?php endif; ?>
         </header>
 

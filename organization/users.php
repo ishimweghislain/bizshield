@@ -215,14 +215,20 @@ $toast = get_toast_message();
                             <td class="px-6 py-5">
                                 <div class="flex items-center justify-end gap-2">
                                     <?php if ($can_edit): ?>
-                                    <button onclick="openEditModal(<?php echo htmlspecialchars(json_encode($user)); ?>)" class="p-2 text-gray-300 hover:text-primary transition-all">
-                                        <i class="ph ph-note-pencil text-xl"></i>
-                                    </button>
-                                    <?php if ($user['role'] != 'org_admin'): ?>
-                                    <a href="?delete=<?php echo $user['id']; ?>" onclick="return confirm('Are you sure you want to remove this member?')" class="p-2 text-gray-300 hover:text-red-500 transition-all">
-                                        <i class="ph ph-trash text-xl"></i>
-                                    </a>
-                                    <?php endif; ?>
+                                         <a href="documents.php?user_id=<?php echo $user['id']; ?>" class="p-2 bg-primary/5 text-primary rounded-xl hover:bg-primary hover:text-white transition-all" title="View Documents">
+                                             <i class="ph ph-files text-lg font-bold"></i>
+                                         </a>
+                                         <button onclick="openEditModal(<?php echo htmlspecialchars(json_encode($user)); ?>)" class="p-2 text-gray-300 hover:text-primary transition-all" title="Edit User">
+                                            <i class="ph ph-note-pencil text-xl"></i>
+                                         </button>
+                                         <?php if ($user['role'] != 'org_admin'): ?>
+                                         <button onclick="toggleUser(<?php echo $user['id']; ?>, '<?php echo $user['status'] == 'active' ? 'disabled' : 'active'; ?>')" class="p-2 <?php echo $user['status'] == 'active' ? 'bg-orange-50 text-orange-600 hover:bg-orange-600' : 'bg-green-50 text-green-600 hover:bg-green-600'; ?> rounded-xl hover:text-white transition-all shadow-sm" title="<?php echo $user['status'] == 'active' ? 'Disable User' : 'Enable User'; ?>">
+                                             <i class="ph <?php echo $user['status'] == 'active' ? 'ph-user-minus' : 'ph-user-plus'; ?> text-lg"></i>
+                                         </button>
+                                         <button onclick="deleteUser(<?php echo $user['id']; ?>)" class="p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm" title="Delete User">
+                                             <i class="ph ph-trash text-lg"></i>
+                                         </button>
+                                         <?php endif; ?>
                                     <?php endif; ?>
                                 </div>
                             </td>
