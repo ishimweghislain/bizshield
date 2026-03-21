@@ -160,6 +160,31 @@ if (!empty($notifications)) {
                 <span class="text-xl font-bold text-primary tracking-tight">BizShield</span>
             </div>
             <nav class="space-y-1">
+                <?php if ($toast): ?>
+            <div id="toast" class="fixed top-24 right-10 z-[2000] bg-white border-l-4 border-primary p-5 rounded-2xl shadow-2xl animate-fade-in flex items-center gap-4 max-w-sm">
+                <div class="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center shrink-0">
+                    <i class="ph ph-check-circle text-xl font-bold"></i>
+                </div>
+                <p class="text-xs font-bold text-gray-700 leading-tight"><?php echo $toast['message']; ?></p>
+            </div>
+            <script>setTimeout(() => { document.getElementById('toast')?.remove(); }, 3000);</script>
+        <?php endif; ?>
+
+        <?php if (!empty($notifications) && $role === 'org_user'): ?>
+            <div class="mb-10 space-y-3" data-aos="fade-down">
+                <?php foreach ($notifications as $n): ?>
+                <div class="p-5 rounded-[2rem] border <?php echo $n['type'] == 'warning' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-primary/5 border-primary/10 text-primary'; ?> flex items-center justify-between gap-6 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 <?php echo $n['type'] == 'warning' ? 'bg-red-500' : 'bg-primary'; ?> text-white rounded-2xl flex items-center justify-center shadow-lg">
+                            <i class="ph ph-<?php echo $n['type'] == 'warning' ? 'warning' : 'info'; ?> text-xl font-bold"></i>
+                        </div>
+                        <p class="text-xs font-black uppercase tracking-tight"><?php echo $n['message']; ?></p>
+                    </div>
+                    <span class="text-[10px] font-bold opacity-40 italic"><?php echo date('H:i', strtotime($n['created_at'])); ?></span>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
                 <?php if ($role === 'org_admin'): ?>
                 <a href="dashboard.php" class="sidebar-link text-gray-400 hover:text-primary hover:bg-green-50/50 flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all group">
                     <i class="ph ph-squares-four text-xl"></i>
