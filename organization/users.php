@@ -93,7 +93,8 @@ $toast = get_toast_message();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Management | <?php echo $_SESSION['org_name']; ?></title>
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    <title>Team Management | BizShield</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>

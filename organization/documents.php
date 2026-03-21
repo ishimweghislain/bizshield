@@ -94,7 +94,8 @@ $toast = get_toast_message();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Documents | <?php echo $_SESSION['org_name']; ?></title>
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    <title>My Documents | BizShield</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -305,7 +306,7 @@ $toast = get_toast_message();
                         ?>
                     </div>
                     <div class="flex gap-2">
-                        <a href="../<?php echo $doc['file_path']; ?>" target="_blank" class="w-10 h-10 bg-white border border-gray-50 text-gray-400 rounded-full flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-sm">
+                        <a href="view_doc.php?id=<?php echo $doc['id']; ?>" target="_blank" class="w-10 h-10 bg-white border border-gray-50 text-gray-400 rounded-full flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-sm">
                             <i class="ph ph-eye font-bold"></i>
                         </a>
                         <?php if ($role === 'org_admin' && $doc['status'] === 'pending'): ?>
