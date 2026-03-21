@@ -239,32 +239,30 @@ $toast = get_toast_message();
                     <h2 class="text-xl font-bold mb-1 font-serif">Add Team Member</h2>
                     <p class="text-green-100 text-[10px] font-bold uppercase tracking-widest italic tracking-tighter">New Portal Credentials</p>
                 </div>
-                <form action="" method="POST" class="p-8 space-y-4">
-                    <div class="space-y-1">
-                        <label class="text-[10px] text-primary font-bold ml-1 uppercase tracking-widest">Username</label>
-                        <input type="text" name="username" required placeholder="member_username" class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm">
+                <form action="" method="POST" class="p-8 space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] text-primary font-black ml-1 uppercase tracking-widest">Username</label>
+                            <input type="text" name="username" required placeholder="user.name" class="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all text-xs">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] text-primary font-black ml-1 uppercase tracking-widest">Email</label>
+                            <input type="email" name="email" required placeholder="email@co.rw" class="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all text-xs">
+                        </div>
                     </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] text-primary font-bold ml-1 uppercase tracking-widest">Email Address</label>
-                        <input type="email" name="email" required placeholder="email@company.rw" class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm">
-                    </div>
-                    <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10">
-                        <label class="text-[10px] text-primary font-black ml-1 uppercase tracking-widest block mb-4 italic">Auto-Required Documents:</label>
-                        <div class="flex items-center gap-4">
-                            <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm">
-                                <i class="ph ph-identification-card text-primary font-bold"></i>
-                                <span class="text-[10px] font-black text-gray-600 uppercase">Personal ID</span>
-                            </div>
-                            <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm">
-                                <i class="ph ph-certificate text-primary font-bold"></i>
-                                <span class="text-[10px] font-black text-gray-600 uppercase">Work Contract</span>
-                            </div>
+
+                    <div class="bg-primary/5 p-4 rounded-2xl border border-primary/10 flex items-center justify-between">
+                        <label class="text-[10px] text-primary font-black uppercase tracking-widest italic">Standard Docs:</label>
+                        <div class="flex items-center gap-2">
+                             <span class="text-[9px] font-black text-gray-500 bg-white px-2 py-1 rounded-lg border border-gray-100 shadow-sm uppercase tracking-tighter">Personal ID</span>
+                             <span class="text-[9px] font-black text-gray-500 bg-white px-2 py-1 rounded-lg border border-gray-100 shadow-sm uppercase tracking-tighter">Employment Contract</span>
                         </div>
                     </div>
                     <input type="hidden" name="required_doc" value="ID & Work Contract">
+
                     <div class="space-y-1">
-                        <label class="text-[10px] text-primary font-bold ml-1 uppercase tracking-widest">Login Password</label>
-                        <input type="password" name="password" required placeholder="••••••••" class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm">
+                        <label class="text-[10px] text-primary font-black ml-1 uppercase tracking-widest">Login Password</label>
+                        <input type="password" name="password" required placeholder="••••••••" class="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all text-xs">
                     </div>
                     <div class="flex gap-4 pt-4">
                         <button type="button" onclick="document.getElementById('userModal').classList.add('hidden')" class="flex-1 bg-gray-50 text-gray-400 py-4 rounded-2xl font-bold text-xs hover:bg-gray-100 transition-all">Cancel</button>

@@ -356,26 +356,29 @@ $toast = get_toast_message();
         </div>
 
         <!-- Upload Modal -->
-        <div id="uploadModal" class="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div id="uploadModal" class="fixed inset-0 z-[1000] bg-black/60 backdrop-blur-md hidden flex items-center justify-center p-4">
             <div class="bg-white w-full max-w-md rounded-[3rem] shadow-2xl overflow-hidden animate-zoom-in">
-                <div class="bg-primary p-12 text-white text-center">
+                <div class="bg-primary p-12 text-white text-center relative">
+                    <button type="button" onclick="closeUploadModal()" class="absolute top-6 right-6 w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-all">
+                        <i class="ph ph-x font-bold"></i>
+                    </button>
                     <i class="ph ph-file-arrow-up text-5xl mb-4 font-bold"></i>
                     <h2 class="text-2xl font-bold mb-1 font-serif">Upload <span id="modal-label">Document</span></h2>
                     <p class="text-green-100 text-[10px] font-bold uppercase tracking-widest italic">PDF, DOC, or Images</p>
                 </div>
                 <form action="" method="POST" enctype="multipart/form-data" class="p-12 space-y-8">
                     <input type="hidden" name="doc_label" id="doc_label_input" value="General Doc">
-                    <div class="group relative space-y-3">
+                    <div class="space-y-3">
                         <label class="text-[10px] text-primary font-black uppercase tracking-widest ml-1">Select File</label>
-                        <div onclick="document.getElementById('file-input').click()" class="border-4 border-dashed border-gray-50 rounded-[2rem] p-12 text-center hover:bg-gray-50 hover:border-primary/20 transition-all cursor-pointer">
+                        <label class="group block border-4 border-dashed border-gray-50 rounded-[2rem] p-12 text-center hover:bg-gray-50 hover:border-primary/20 transition-all cursor-pointer">
                             <i class="ph ph-cloud-arrow-up text-4xl text-gray-300 group-hover:text-primary mb-4 block"></i>
-                            <p id="file-name" class="text-sm text-gray-400 font-bold">Click to browse files</p>
-                            <input type="file" name="document" id="file-input" required class="hidden" onchange="document.getElementById('file-name').textContent = this.files[0].name; document.getElementById('file-name').className = 'text-sm text-primary font-black animate-pulse'">
-                        </div>
+                            <p id="file-display-name" class="text-sm text-gray-400 font-bold">Click to browse files</p>
+                            <input type="file" name="document" id="file-input" required class="hidden" onchange="handleFileSelect(this)">
+                        </label>
                     </div>
                     <div class="flex gap-4 pt-4">
-                        <button type="button" onclick="document.getElementById('uploadModal').classList.add('hidden')" class="flex-1 bg-gray-50 text-gray-400 py-5 rounded-[1.5rem] font-bold text-sm hover:bg-gray-100 transition-all">Cancel</button>
-                        <button type="submit" name="upload_doc" class="flex-2 bg-primary text-white px-10 py-5 rounded-[1.5rem] font-bold text-sm hover:bg-primary-light transition-all shadow-2xl shadow-green-900/10">Upload Now</button>
+                        <button type="button" onclick="closeUploadModal()" class="flex-1 bg-gray-50 text-gray-400 py-5 rounded-[1.5rem] font-bold text-sm hover:bg-gray-100 transition-all uppercase tracking-widest">Cancel</button>
+                        <button type="submit" name="upload_doc" class="flex-2 bg-primary text-white px-10 py-5 rounded-[1.5rem] font-bold text-sm hover:bg-primary-light transition-all shadow-2xl shadow-green-900/10 uppercase tracking-widest">Upload Now</button>
                     </div>
                 </form>
             </div>
@@ -386,6 +389,26 @@ $toast = get_toast_message();
     <script>
         AOS.init({ duration: 800, once: true });
         
+        function openUploadModal(label) {
+            document.getElementById('modal-label').textContent = label;
+            document.getElementById('doc_label_input').value = label;
+            document.getElementById('uploadModal').classList.remove('hidden');
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').classList.add('hidden');
+            // Reset file input
+            document.getElementById('file-input').value = '';
+            document.getElementById('file-display-name').textContent = 'Click to browse files';
+        }
+
+        function handleFileSelect(input) {
+            if (input.files && input.files[0]) {
+                document.getElementById('file-display-name').textContent = input.files[0].name;
+                document.getElementById('file-display-name').className = 'text-sm text-primary font-black animate-pulse';
+            }
+        }
+
         function rejectDoc(docId) {
             const reason = prompt("Enter rejection reason:");
             if (reason) {
