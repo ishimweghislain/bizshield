@@ -161,9 +161,17 @@ $toast = get_toast_message();
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <?php foreach ($documents as $doc): ?>
-                    <div class="bg-white border border-gray-100 rounded-[2rem] p-6 shadow-soft shadow-green-900/5 hover:border-primary/20 transition-all group overflow-hidden relative">
-                         <div class="absolute top-4 right-4 focus-within:">
+                    <?php foreach ($documents as $doc): 
+                        $is_rejected = $doc['status'] == 'rejected';
+                    ?>
+                    <div class="bg-white border border-gray-100 rounded-[2rem] p-6 shadow-soft shadow-green-900/5 hover:border-primary/20 transition-all group overflow-hidden relative <?php echo $is_rejected ? 'opacity-75' : ''; ?>">
+                         <?php if ($is_rejected): ?>
+                         <div class="absolute inset-0 bg-white/40 backdrop-blur-[2px] z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                             <div class="bg-red-500 text-white text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest shadow-lg">Rejected Document</div>
+                         </div>
+                         <?php endif; ?>
+
+                         <div class="absolute top-4 right-4 z-20">
                             <?php 
                             $status_classes = [
                                 'pending' => 'bg-orange-50 text-orange-600',
@@ -175,7 +183,7 @@ $toast = get_toast_message();
                                 <?php echo $doc['status']; ?>
                             </span>
                          </div>
-                         <div class="flex items-center gap-4 mb-6">
+                         <div class="flex items-center gap-4 mb-6 <?php echo $is_rejected ? 'blur-[1px]' : ''; ?>">
                             <div class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-primary text-2xl group-hover:scale-110 transition-transform">
                                 <?php echo in_array(strtolower($doc['file_type']), ['jpg','jpeg','png']) ? '<i class="ph ph-image"></i>' : '<i class="ph ph-file-pdf"></i>'; ?>
                             </div>

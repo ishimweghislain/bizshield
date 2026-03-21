@@ -124,8 +124,10 @@ $toast = get_toast_message();
 
         <!-- Document Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-aos="fade-up">
-            <?php foreach ($documents as $doc): ?>
-            <div class="group p-6 bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 hover:border-primary/20 transition-all duration-500 relative overflow-hidden">
+            <?php foreach ($documents as $doc): 
+                $is_rejected = $doc['status'] == 'rejected';
+            ?>
+            <div class="group p-6 bg-white border border-gray-100 rounded-[2.5rem] shadow-soft shadow-green-900/5 hover:border-primary/20 transition-all duration-500 relative overflow-hidden <?php echo $is_rejected ? 'grayscale-[0.5]' : ''; ?>">
                 <!-- Status Badge -->
                 <div class="absolute top-4 right-4 animate-pulse-slow">
                     <?php 
@@ -141,7 +143,7 @@ $toast = get_toast_message();
                     </span>
                 </div>
 
-                <div class="flex items-center justify-between mb-4 mt-2">
+                <div class="flex items-center justify-between mb-4 mt-2 <?php echo $is_rejected ? 'blur-[1px]' : ''; ?>">
                     <div class="w-14 h-14 bg-gray-50 rounded-3xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-sm">
                         <?php 
                         $ext = strtolower($doc['file_type']);
