@@ -162,21 +162,112 @@ $toast = get_toast_message();
             <script>setTimeout(() => { document.getElementById('toast')?.remove(); }, 3000);</script>
         <?php endif; ?>
 
-        <header class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10" data-aos="fade-down">
+        <header class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12" data-aos="fade-down">
             <div>
                 <?php if ($role === 'org_user'): ?>
-                <h1 class="text-xl lg:text-3xl font-black text-gray-900 mb-1 italic">Personal Task: Upload <span class="text-primary font-black underline"><?php echo $required_doc; ?></span></h1>
-                <p class="text-[10px] lg:text-xs text-red-500 font-bold uppercase tracking-widest">Required by your Organization Admin</p>
+                <h1 class="text-2xl lg:text-4xl font-black text-gray-900 mb-2 leading-tight">Welcome, <span class="text-primary"><?php echo $_SESSION['username']; ?></span></h1>
+                <p class="text-xs lg:text-sm text-gray-400 font-bold uppercase tracking-[.2em] flex items-center gap-2">
+                    <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+                    Complete your profile documentation
+                </p>
                 <?php else: ?>
                 <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-1">Team Document Review</h1>
                 <p class="text-xs lg:text-sm text-gray-400 font-medium tracking-tighter">Review and verify papers uploaded by your staff.</p>
                 <?php endif; ?>
             </div>
-            <button onclick="document.getElementById('uploadModal').classList.remove('hidden')" class="bg-primary text-white p-3 lg:px-6 lg:py-3 rounded-2xl font-bold text-sm flex items-center gap-2 hover:bg-primary-light transition-all shadow-lg active:scale-[0.98]">
+            <?php if ($role === 'org_admin'): ?>
+            <button onclick="openUploadModal('General Doc')" class="bg-primary text-white p-3 lg:px-6 lg:py-3 rounded-2xl font-bold text-sm flex items-center gap-2 hover:bg-primary-light transition-all shadow-lg active:scale-[0.98]">
                 <i class="ph ph-upload-simple text-xl font-bold"></i>
-                <span class="hidden lg:inline"><?php echo $role === 'org_user' ? 'Upload Task Now' : 'Upload New Doc'; ?></span>
+                <span class="hidden lg:inline">Upload New Doc</span>
             </button>
+            <?php endif; ?>
         </header>
+
+        <?php if ($role === 'org_user'): ?>
+        <!-- Requirement Cards for Staff -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16" data-aos="fade-up">
+            <!-- ID Card -->
+            <div class="group bg-white border border-gray-100 rounded-[3rem] p-10 shadow-soft hover:border-primary/20 transition-all duration-500 relative overflow-hidden">
+                <div class="absolute -right-8 -top-8 w-32 h-32 bg-primary/5 rounded-full group-hover:scale-125 transition-transform duration-700"></div>
+                <div class="relative z-10">
+                    <div class="w-20 h-20 bg-primary/5 rounded-3xl flex items-center justify-center text-primary mb-8 group-hover:bg-primary group-hover:text-white transition-all duration-500">
+                        <i class="ph ph-identification-card text-4xl"></i>
+                    </div>
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-black text-gray-900 mb-2">Personal Identification</h2>
+                        <p class="text-sm text-gray-400 font-medium leading-relaxed">A clear scanned copy of your valid National ID or Passport front & back.</p>
+                    </div>
+                    
+                    <div class="flex items-center justify-between gap-6">
+                        <div class="shrink-0">
+                            <?php if ($id_doc): ?>
+                                <?php 
+                                $s = $id_doc['status'];
+                                $c = ($s == 'approved') ? 'text-green-500' : (($s == 'rejected') ? 'text-red-500' : 'text-orange-500');
+                                ?>
+                                <span class="<?php echo $c; ?> text-[10px] font-black uppercase tracking-widest flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
+                                    <i class="ph ph-<?php echo ($s == 'approved' ? 'check-circle' : ($s == 'rejected' ? 'warning-circle' : 'hourglass')); ?> text-lg"></i>
+                                    <?php echo $s; ?>
+                                </span>
+                            <?php else: ?>
+                                <span class="text-gray-300 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
+                                    <i class="ph ph-circle text-lg"></i>
+                                    Missing
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                        <button onclick="openUploadModal('ID')" class="flex-1 bg-primary text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-primary-light transition-all shadow-xl shadow-green-900/10">
+                            <?php echo $id_doc ? 'Update ID' : 'Upload ID'; ?>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Work Contract Card -->
+            <div class="group bg-white border border-gray-100 rounded-[3rem] p-10 shadow-soft hover:border-primary/20 transition-all duration-500 relative overflow-hidden">
+                <div class="absolute -right-8 -top-8 w-32 h-32 bg-primary/5 rounded-full group-hover:scale-125 transition-transform duration-700"></div>
+                <div class="relative z-10">
+                    <div class="w-20 h-20 bg-primary/5 rounded-3xl flex items-center justify-center text-primary mb-8 group-hover:bg-primary group-hover:text-white transition-all duration-500">
+                        <i class="ph ph-certificate text-4xl"></i>
+                    </div>
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-black text-gray-900 mb-2">Work Contract</h2>
+                        <p class="text-sm text-gray-400 font-medium leading-relaxed">The signed employment agreement between you and the organization.</p>
+                    </div>
+                    
+                    <div class="flex items-center justify-between gap-6">
+                        <div class="shrink-0">
+                            <?php if ($contract_doc): ?>
+                                <?php 
+                                $s = $contract_doc['status'];
+                                $c = ($s == 'approved') ? 'text-green-500' : (($s == 'rejected') ? 'text-red-500' : 'text-orange-500');
+                                ?>
+                                <span class="<?php echo $c; ?> text-[10px] font-black uppercase tracking-widest flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
+                                    <i class="ph ph-<?php echo ($s == 'approved' ? 'check-circle' : ($s == 'rejected' ? 'warning-circle' : 'hourglass')); ?> text-lg"></i>
+                                    <?php echo $s; ?>
+                                </span>
+                            <?php else: ?>
+                                <span class="text-gray-300 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
+                                    <i class="ph ph-circle text-lg"></i>
+                                    Missing
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                        <button onclick="openUploadModal('Work Contract')" class="flex-1 bg-primary text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-primary-light transition-all shadow-xl shadow-green-900/10">
+                            <?php echo $contract_doc ? 'Update Contract' : 'Upload Contract'; ?>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <div class="mb-10">
+            <h2 class="text-sm font-black text-gray-900 uppercase tracking-[.3em] mb-6 flex items-center gap-3">
+                <span class="w-10 h-[2px] bg-primary"></span>
+                <?php echo $role === 'org_user' ? 'Submission History' : 'Recent Uploads'; ?>
+            </h2>
+        </div>
 
         <!-- Document Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-aos="fade-up">
