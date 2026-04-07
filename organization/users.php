@@ -284,6 +284,11 @@ $toast = get_toast_message();
                     </div>
 
                     <div class="space-y-1">
+                        <label class="text-[10px] text-primary font-black ml-1 uppercase tracking-widest">Portal Role</label>
+                        <input type="text" value="Organization Member" disabled class="w-full px-5 py-4 bg-gray-50 border border-emerald-100 text-emerald-700 font-bold rounded-2xl outline-none text-xs">
+                    </div>
+
+                    <div class="space-y-1">
                         <label class="text-[10px] text-primary font-black ml-1 uppercase tracking-widest">Login Password</label>
                         <input type="password" name="password" required placeholder="••••••••" class="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all text-xs">
                     </div>
