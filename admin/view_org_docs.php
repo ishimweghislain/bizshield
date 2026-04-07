@@ -53,8 +53,8 @@ if (isset($_GET['doc_action']) && isset($_GET['doc_id'])) {
     exit;
 }
 
-// Fetch Organization Details
-$stmt = $pdo->prepare("SELECT * FROM organizations WHERE id = ?");
+// Fetch Organization Details & Primary Role
+$stmt = $pdo->prepare("SELECT o.*, u.role FROM organizations o LEFT JOIN users u ON o.id = u.organization_id WHERE o.id = ? ORDER BY u.id ASC LIMIT 1");
 $stmt->execute([$org_id]);
 $org = $stmt->fetch();
 
@@ -170,7 +170,7 @@ $toast = get_toast_message();
                     </h1>
                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[.3em] flex items-center gap-2 mt-1">
                         <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-                        Reviewing compliance documents
+                        Reviewing <?php echo ($org['role'] === 'member') ? 'Individual Member' : 'Corporate Organization'; ?>
                     </p>
                 </div>
             </div>
@@ -247,8 +247,12 @@ $toast = get_toast_message();
                                 <?php echo in_array(strtolower($doc['file_type']), ['jpg','jpeg','png']) ? '<i class="ph ph-image"></i>' : '<i class="ph ph-file-pdf"></i>'; ?>
                             </div>
                             <div class="flex-grow min-w-0">
+                                <p class="text-[10px] text-primary font-black uppercase tracking-widest mb-1"><?php echo htmlspecialchars($doc['doc_label'] ?? 'General Document'); ?></p>
                                 <p class="text-sm font-bold text-gray-900 truncate"><?php echo $doc['file_name']; ?></p>
-                                <p class="text-[10px] text-gray-400 font-medium">By: <?php echo $doc['uploader']; ?></p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">By: <?php echo $doc['uploader']; ?></p>
+                                </div>
                             </div>
                          </div>
                          
@@ -290,7 +294,13 @@ $toast = get_toast_message();
                             </div>
                             <div>
                                 <p class="text-xs font-bold text-gray-900"><?php echo $u['username']; ?></p>
-                                <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest"><?php echo $u['role'] == 'org_admin' ? 'Super Admin' : 'Staff'; ?></p>
+                                <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
+                                    <?php 
+                                    if ($u['role'] == 'org_admin') echo 'Super Admin';
+                                    elseif ($u['role'] == 'member') echo 'Member';
+                                    else echo 'Staff';
+                                    ?>
+                                </p>
                             </div>
                         </div>
                         <div class="w-2 h-2 rounded-full <?php echo $u['status'] == 'active' ? 'bg-green-400' : 'bg-gray-300'; ?>"></div>

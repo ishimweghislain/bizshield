@@ -31,13 +31,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_user'])) {
     $username = $_POST['username'];
     $email = $_POST['email'];
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $required_doc = $_POST['required_doc'];
-    $role = 'org_user';
+    $role = 'member'; // Set specifically to member for the new workflow
 
     try {
-        $stmt = $pdo->prepare("INSERT INTO users (organization_id, username, password, email, role, status, required_doc) VALUES (?, ?, ?, ?, ?, 'active', ?)");
-        $stmt->execute([$org_id, $username, $password, $email, $role, $required_doc]);
-        set_toast_message("Team member created successfully.");
+        $stmt = $pdo->prepare("INSERT INTO users (organization_id, username, password, email, role, status) VALUES (?, ?, ?, ?, ?, 'active')");
+        $stmt->execute([$org_id, $username, $password, $email, $role]);
+        set_toast_message("New member added to BizShield. They must now login to upload ID, Photo, Enrollment, and Medical info.");
     } catch (Exception $e) {
         set_toast_message("Error: " . $e->getMessage(), "warning");
     }
@@ -258,14 +257,15 @@ $toast = get_toast_message();
                         </div>
                     </div>
 
-                    <div class="bg-primary/5 p-4 rounded-2xl border border-primary/10 flex items-center justify-between">
-                        <label class="text-[10px] text-primary font-black uppercase tracking-widest italic">Standard Docs:</label>
-                        <div class="flex items-center gap-2">
-                             <span class="text-[9px] font-black text-gray-500 bg-white px-2 py-1 rounded-lg border border-gray-100 shadow-sm uppercase tracking-tighter">Personal ID</span>
-                             <span class="text-[9px] font-black text-gray-500 bg-white px-2 py-1 rounded-lg border border-gray-100 shadow-sm uppercase tracking-tighter">Employment Contract</span>
+                    <div class="px-6 py-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-4">
+                        <div class="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center text-xl shadow-lg shadow-emerald-900/10">
+                            <i class="ph ph-shield-check"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-emerald-800 font-black uppercase tracking-widest">Automatic Compliance</p>
+                            <p class="text-[8px] text-emerald-600 font-bold leading-tight">Member will be asked for ID, Photo, Enrollment & Medical docs.</p>
                         </div>
                     </div>
-                    <input type="hidden" name="required_doc" value="ID & Work Contract">
 
                     <div class="space-y-1">
                         <label class="text-[10px] text-primary font-black ml-1 uppercase tracking-widest">Login Password</label>

@@ -168,7 +168,18 @@ $toast = get_toast_message();
                                     </div>
                                     <div>
                                         <p class="text-sm font-bold text-gray-900"><?php echo $org['name']; ?></p>
-                                        <p class="text-[10px] text-gray-400 font-medium truncate w-32"><?php echo $org['email']; ?></p>
+                                        <div class="flex items-center gap-2">
+                                            <p class="text-[10px] text-gray-400 font-medium truncate w-32"><?php echo $org['email']; ?></p>
+                                            <span class="w-1 h-1 rounded-full bg-slate-200"></span>
+                                            <p class="text-[8px] font-black uppercase text-primary tracking-widest">
+                                                <?php 
+                                                $role_stmt = $pdo->prepare("SELECT role FROM users WHERE organization_id = ? ORDER BY id ASC LIMIT 1");
+                                                $role_stmt->execute([$org['id']]);
+                                                $role = $role_stmt->fetchColumn();
+                                                echo ($role === 'member') ? 'Individual' : 'Corporate';
+                                                ?>
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </td>
