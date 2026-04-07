@@ -80,6 +80,22 @@ if (isset($_GET['delete'])) {
     exit;
 }
 
+// Handle User Status Toggle
+if (isset($_GET['toggle_status']) && isset($_GET['uid'])) {
+    if (!$can_edit) {
+        set_toast_message("Access denied.", "warning");
+        header("Location: users.php");
+        exit;
+    }
+    $uid = $_GET['uid'];
+    $new_status = $_GET['toggle_status'];
+    $stmt = $pdo->prepare("UPDATE users SET status = ? WHERE id = ? AND organization_id = ? AND role != 'org_admin'");
+    $stmt->execute([$new_status, $uid, $org_id]);
+    set_toast_message("Member status updated.");
+    header("Location: users.php");
+    exit;
+}
+
 // Fetch users
 $stmt = $pdo->prepare("SELECT * FROM users WHERE organization_id = ? ORDER BY created_at DESC");
 $stmt->execute([$org_id]);
@@ -314,6 +330,18 @@ $toast = get_toast_message();
             document.getElementById('edit_username').value = user.username;
             document.getElementById('edit_email').value = user.email;
             document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function toggleUser(uid, newStatus) {
+            if (confirm(`Are you sure you want to ${newStatus === 'active' ? 'enable' : 'disable'} this member?`)) {
+                window.location.href = `users.php?uid=${uid}&toggle_status=${newStatus}`;
+            }
+        }
+
+        function deleteUser(uid) {
+            if (confirm("Permanently remove this member from the organization? This action cannot be undone.")) {
+                window.location.href = `users.php?delete=${uid}`;
+            }
         }
     </script>
 </body>

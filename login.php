@@ -30,12 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
                 $target = "admin/dashboard.php";
             } else if ($user_role == 'org_admin') {
                 $target = "organization/dashboard.php";
-            } else if ($user_role == 'member') {
+            } else if ($user_role === 'member') {
                 $target = "member/dashboard.php";
-            } else if ($user_role == 'org_user') {
+            } else if ($user_role === 'org_user') {
                 $target = "organization/documents.php";
             } else {
-                $error = "Access denied: Your role ($user_role) is not configured for dashboard access.";
+                $role_label = $user_role ?: 'UNDEFINED/NULL';
+                $error = "Access denied: Your role ($role_label) is not configured for dashboard access.";
             }
 
             if (!$error) {
