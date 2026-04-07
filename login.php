@@ -8,32 +8,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    $stmt = $pdo->prepare("SELECT u.*, o.status as org_status, o.name as org_name FROM users u LEFT JOIN organizations o ON u.organization_id = o.id WHERE u.username = ?");
-    $stmt->execute([$username]);
+    $stmt = $pdo->prepare("SELECT u.id, u.organization_id, u.username, u.password, u.email, u.role, u.status as user_status, o.status as org_status, o.name as org_name FROM users u LEFT JOIN organizations o ON u.organization_id = o.id WHERE u.username = ? OR u.email = ?");
+    $stmt->execute([$username, $username]); // Check both fields
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['password'])) {
-        if ($user['status'] == 'disabled') {
+        $user_role = strtolower(trim($user['role'] ?? ''));
+        
+        if ($user['user_status'] == 'disabled') {
             $error = "Your account has been disabled.";
-        } else if ($user['role'] != 'admin' && $user['org_status'] == 'disabled') {
+        } else if ($user_role != 'admin' && $user['org_status'] == 'disabled') {
             $error = "Your organization has been disabled by the administrator.";
         } else {
             $_SESSION['user_id'] = $user['id'];
-            $_SESSION['role'] = $user['role'];
+            $_SESSION['role'] = $user_role;
             $_SESSION['org_id'] = $user['organization_id'];
             $_SESSION['username'] = $user['username'];
-            $_SESSION['org_name'] = $user['org_name'];
+            $_SESSION['org_name'] = $user['org_name'] ?? 'Support';
 
-            if ($user['role'] == 'admin') {
-                header("Location: admin/dashboard.php");
-            } else if ($user['role'] == 'org_admin') {
-                header("Location: organization/dashboard.php");
-            } else if ($user['role'] == 'member') {
-                header("Location: member/dashboard.php");
+            if ($user_role == 'admin') {
+                $target = "admin/dashboard.php";
+            } else if ($user_role == 'org_admin') {
+                $target = "organization/dashboard.php";
+            } else if ($user_role == 'member') {
+                $target = "member/dashboard.php";
+            } else if ($user_role == 'org_user') {
+                $target = "organization/documents.php";
             } else {
-                header("Location: organization/documents.php");
+                $error = "Access denied: Your role ($user_role) is not configured for dashboard access.";
             }
-            exit;
+
+            if (!$error) {
+                session_write_close();
+                header("Location: $target");
+                exit;
+            }
         }
     } else {
         $error = "Invalid username or password.";

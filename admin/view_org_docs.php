@@ -19,12 +19,16 @@ if (isset($_GET['doc_action']) && isset($_GET['doc_id'])) {
     $doc_action = $_GET['doc_action']; // Renamed from $action for clarity with the new logic
     $reason = $_GET['reason'] ?? 'Document does not meet requirements.'; // Default reason for rejection
 
-    // Fetch Target User ID and document label for notification
-    $target_stmt = $pdo->prepare("SELECT user_id, doc_label FROM documents WHERE id = ?");
+    // Fetch Target User ID, label, and existing rejection count
+    $target_stmt = $pdo->prepare("SELECT user_id, doc_label, rejection_count FROM documents WHERE id = ?");
     $target_stmt->execute([$doc_id]);
     $target_info = $target_stmt->fetch();
     $target_user_id = $target_info['user_id'];
-    $label = $target_info['doc_label'];
+    $label = $target_info['doc_label'] ?: 'Requirement Document';
+    $rejection_count = (int)$target_info['rejection_count'];
+
+    $stars = str_repeat('*', $rejection_count);
+    $display_label = $label . $stars;
     
     if ($doc_action == 'approve') {
         $stmt = $pdo->prepare("UPDATE documents SET status = 'approved' WHERE id = ?");
@@ -32,19 +36,20 @@ if (isset($_GET['doc_action']) && isset($_GET['doc_id'])) {
         set_toast_message("Document approved.");
 
         // Notify Team Member
-        $notif = "Congratulations! Your document '$label' has been approved by the global administrator.";
+        $notif = "Congratulations! Your document '$display_label' has been approved by the global administrator.";
         $pdo->prepare("INSERT INTO notifications (user_id, message, type) VALUES (?, ?, 'info')")->execute([$target_user_id, $notif]);
 
     } elseif ($doc_action == 'reject') {
-        $stmt = $pdo->prepare("UPDATE documents SET status = 'rejected', rejection_reason = ? WHERE id = ?");
+        // Increment rejection count for this specific document record
+        $stmt = $pdo->prepare("UPDATE documents SET status = 'rejected', rejection_reason = ?, rejection_count = rejection_count + 1 WHERE id = ?");
         $stmt->execute([$reason, $doc_id]);
         
-        // Notify Org (existing)
+        // Notify Org
         $stmt = $pdo->prepare("INSERT INTO notifications (organization_id, message, type) VALUES (?, ?, 'warning')");
-        $stmt->execute([$org_id, "Your document was rejected: " . $reason]);
+        $stmt->execute([$org_id, "Your document '$display_label' was rejected: " . $reason]);
 
-        // Notify Team Member (new)
-        $notif = "CRITICAL: Your document '$label' was rejected by the global admin: $reason";
+        // Notify Team Member
+        $notif = "CRITICAL: Your document '$display_label' was rejected by the global admin: $reason";
         $pdo->prepare("INSERT INTO notifications (user_id, message, type) VALUES (?, ?, 'warning')")->execute([$target_user_id, $notif]);
         
         set_toast_message("Document rejected.", "warning");

@@ -3,6 +3,16 @@ require_once 'config.php';
 
 $error = '';
 $success = '';
+$toast = get_toast_message();
+
+// Initialize variables for the form
+$biz_name = '';
+$owner_name = '';
+$email = '';
+$phone = '';
+$username = '';
+$full_name = '';
+$type = 'org';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
     $type = $_POST['reg_type'] ?? 'org'; // 'org' or 'member'
@@ -44,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
             $role = ($type === 'org') ? 'org_admin' : 'member';
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO users (organization_id, username, password, email, role, status) VALUES (?, ?, ?, ?, ?, 'active')");
-            $stmt->execute([$org_id, $username, $hashed_password, $email]);
+            $stmt->execute([$org_id, $username, $hashed_password, $email, $role]);
             $user_id = $pdo->lastInsertId();
 
             // 3. Handle File Uploads
@@ -85,12 +95,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
 
             $pdo->commit();
             set_toast_message("Registration submitted! Our team will review your documents.", "success");
-            header("Location: login.php");
+            echo "<script>localStorage.removeItem('bizshield_reg_step'); localStorage.removeItem('bizshield_reg_data'); localStorage.removeItem('bizshield_reg_files'); window.location.href='login.php';</script>";
             exit;
 
         } catch (Exception $e) {
             $pdo->rollBack();
-            $error = $e->getMessage();
+            $toast = ['message' => $e->getMessage(), 'type' => 'warning'];
+            $failed_step = 4;
         }
     }
 }
@@ -232,6 +243,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
         <?php include 'components/navbar.php'; ?>
     </header>
 
+    <?php if ($toast): ?>
+        <div id="toast" class="fixed top-32 right-6 z-[2000] bg-white border border-slate-100 rounded-2xl shadow-2xl p-6 border-l-4 <?php echo $toast['type'] == 'success' ? 'border-l-emerald-500' : 'border-l-orange-500'; ?> flex items-center gap-4 animate-bounce-in">
+            <div class="w-10 h-10 rounded-full <?php echo $toast['type'] == 'success' ? 'bg-emerald-50 text-emerald-500' : 'bg-orange-50 text-orange-500'; ?> flex items-center justify-center"><i class="ph <?php echo $toast['type'] == 'success' ? 'ph-check-circle' : 'ph-warning-circle'; ?> text-2xl font-bold"></i></div>
+            <div>
+                <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest"><?php echo ucfirst($toast['type']); ?></p>
+                <p class="text-sm font-bold text-slate-700"><?php echo $toast['message']; ?></p>
+            </div>
+        </div>
+        <script>setTimeout(() => { document.getElementById('toast')?.remove(); }, 5000);</script>
+    <?php endif; ?>
+
     <main class="py-12 px-4 flex flex-col items-center justify-center">
         <!-- Progress Stepper -->
         <div class="max-w-md w-full mb-8 flex items-center justify-between px-6" id="stepper">
@@ -267,15 +289,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
                 <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
                 <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-48 h-48 bg-accent/20 rounded-full blur-2xl"></div>
             </div>
-
-            <?php if ($error): ?>
-                <div class="mx-8 mt-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-xs font-bold flex items-center gap-3 animate-shake">
-                    <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-                        <i class="ph ph-warning-circle text-lg font-bold"></i>
-                    </div>
-                    <?php echo $error; ?>
-                </div>
-            <?php endif; ?>
 
             <form action="" method="POST" enctype="multipart/form-data" id="multistep-form" class="p-8 lg:p-12 space-y-8">
                 
@@ -315,14 +328,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
                             <label class="text-[10px] text-slate-400 font-black ml-1 uppercase tracking-widest transition-all">Company / Group Name</label>
                             <div class="relative">
                                 <i class="ph ph-briefcase absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 text-xl"></i>
-                                <input type="text" name="biz_name" required placeholder="Africa Trading Ltd" class="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/5 focus:bg-white focus:border-primary/20 outline-none transition-all text-sm font-semibold">
+                                <input type="text" name="biz_name" required value="<?php echo htmlspecialchars($biz_name); ?>" placeholder="Africa Trading Ltd" class="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/5 focus:bg-white focus:border-primary/20 outline-none transition-all text-sm font-semibold">
                             </div>
                         </div>
                         <div class="space-y-2 input-group">
                             <label class="text-[10px] text-slate-400 font-black ml-1 uppercase tracking-widest transition-all">Legal Representative</label>
                             <div class="relative">
                                 <i class="ph ph-signature absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 text-xl"></i>
-                                <input type="text" name="owner_name" required placeholder="Full Legal Name" class="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/5 focus:bg-white focus:border-primary/20 outline-none transition-all text-sm font-semibold">
+                                <input type="text" name="owner_name" required value="<?php echo htmlspecialchars($owner_name); ?>" placeholder="Full Legal Name" class="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/5 focus:bg-white focus:border-primary/20 outline-none transition-all text-sm font-semibold">
                             </div>
                         </div>
                     </div>
@@ -330,11 +343,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div class="space-y-2 input-group">
                             <label class="text-[10px] text-slate-400 font-black ml-1 uppercase tracking-widest">Business Email</label>
-                            <input type="email" name="email" required placeholder="hello@company.rw" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none transition-all text-sm font-semibold">
+                            <input type="email" name="email" required value="<?php echo htmlspecialchars($email); ?>" placeholder="hello@company.rw" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none transition-all text-sm font-semibold">
                         </div>
                         <div class="space-y-2 input-group">
                             <label class="text-[10px] text-slate-400 font-black ml-1 uppercase tracking-widest">Phone Contact</label>
-                            <input type="tel" name="phone" required placeholder="+250 7..." class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none transition-all text-sm font-semibold">
+                            <input type="tel" name="phone" required value="<?php echo htmlspecialchars($phone); ?>" placeholder="+250 7..." class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none transition-all text-sm font-semibold">
                         </div>
                     </div>
                 </div>
@@ -358,12 +371,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
                         foreach($org_docs as $key => $doc): 
                         ?>
                         <div class="file-upload-item relative p-4 border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center justify-center text-center group cursor-pointer" onclick="document.getElementById('file-<?php echo $key; ?>').click()">
-                            <input type="file" name="<?php echo $key; ?>" id="file-<?php echo $key; ?>" required class="hidden" onchange="previewFile('<?php echo $key; ?>')">
+                            <input type="file" name="<?php echo $key; ?>" id="file-<?php echo $key; ?>" class="hidden" onchange="previewFile('<?php echo $key; ?>')">
                             <i class="ph <?php echo $doc['icon']; ?> text-2xl text-slate-300 group-hover:text-primary transition-colors mb-2"></i>
                             <span class="text-[10px] font-black uppercase text-slate-400 tracking-tighter group-hover:text-primary"><?php echo $doc['label']; ?></span>
                             <p id="name-<?php echo $key; ?>" class="text-[9px] text-emerald-600 font-bold mt-1 truncate w-full px-2"></p>
                         </div>
                         <?php endforeach; ?>
+                    </div>
+
+                    <div id="refresh-file-warning" class="hidden p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center gap-4">
+                        <i class="ph ph-warning-circle text-amber-500 text-xl font-bold"></i>
+                        <p class="text-[10px] text-amber-700 font-bold leading-relaxed">Due to browser health & security, please re-tap the <span class="text-amber-800 underline">orange boxes</span> above to re-select your local files if you refreshed the page.</p>
                     </div>
                 </div>
 
@@ -377,11 +395,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
                     <div class="space-y-4">
                         <div class="space-y-2 input-group">
                             <label class="text-[10px] text-slate-400 font-black ml-1 uppercase tracking-widest">Portal Username</label>
-                            <input type="text" name="username" placeholder="j.doe" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none transition-all text-sm font-semibold">
+                            <input type="text" name="username" value="<?php echo htmlspecialchars($username); ?>" placeholder="j.doe" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none transition-all text-sm font-semibold">
                         </div>
                         <div class="space-y-2 input-group">
                             <label class="text-[10px] text-slate-400 font-black ml-1 uppercase tracking-widest">Access Password</label>
-                            <input type="password" name="password" placeholder="••••••••" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none transition-all text-sm font-semibold">
+                            <input type="password" name="password" required placeholder="••••••••" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none transition-all text-sm font-semibold">
                         </div>
                     </div>
 
@@ -423,9 +441,72 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
     <script>
         AOS.init({ duration: 1000, once: true });
 
-        let currentStep = 1;
+        let currentStep = <?php echo $failed_step ?? "parseInt(localStorage.getItem('bizshield_reg_step')) || 1"; ?>;
         const totalSteps = 4;
         let userType = 'org';
+        // Direct initialization if failed step was set
+        function saveFormData() {
+            const formData = {};
+            const inputs = document.querySelectorAll('#multistep-form input:not([type="file"]):not([type="password"])');
+            inputs.forEach(input => {
+                if (input.name) formData[input.name] = input.value;
+            });
+            localStorage.setItem('bizshield_reg_data', JSON.stringify(formData));
+
+            // Save file names for visual persistence
+            const fileData = {};
+            document.querySelectorAll('#multistep-form input[type="file"]').forEach(input => {
+                if (input.files && input.files[0]) {
+                    fileData[input.id] = input.files[0].name;
+                }
+            });
+            const existingFiles = JSON.parse(localStorage.getItem('bizshield_reg_files') || '{}');
+            localStorage.setItem('bizshield_reg_files', JSON.stringify({...existingFiles, ...fileData}));
+        }
+
+        function restoreFormData() {
+            const savedData = localStorage.getItem('bizshield_reg_data');
+            if (savedData) {
+                const formData = JSON.parse(savedData);
+                for (const [name, value] of Object.entries(formData)) {
+                    const input = document.querySelector(`[name="${name}"]`);
+                    if (input && !input.value) {
+                        input.value = value;
+                    }
+                }
+            }
+
+            const savedFiles = localStorage.getItem('bizshield_reg_files');
+            if (savedFiles) {
+                const fileData = JSON.parse(savedFiles);
+                let hasFiles = false;
+                for (const [id, name] of Object.entries(fileData)) {
+                    hasFiles = true;
+                    const nameEl = document.getElementById(id.replace('file-', 'name-'));
+                    if (nameEl) {
+                        nameEl.textContent = "Previously: " + name;
+                        nameEl.classList.add('text-amber-500');
+                        document.getElementById(id).closest('.file-upload-item').classList.add('border-amber-400', 'bg-amber-50/20');
+                    }
+                }
+                if (hasFiles) document.getElementById('refresh-file-warning')?.classList.remove('hidden');
+            }
+        }
+
+        window.addEventListener('load', () => {
+            restoreFormData();
+            
+            // Add auto-save listeners
+            document.querySelectorAll('#multistep-form input:not([type="file"])').forEach(input => {
+                input.addEventListener('input', saveFormData);
+            });
+
+            if (currentStep > 1) {
+                document.querySelectorAll('.step-content').forEach(s => s.classList.add('hidden'));
+                document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+                updateUI();
+            }
+        });
 
         function toggleRegType(type) {
             userType = type;
@@ -467,9 +548,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
             document.getElementById(`step-${nextStep}`).classList.add('animate-slide-up');
 
             currentStep = nextStep;
+            localStorage.setItem('bizshield_reg_step', currentStep);
             updateUI();
         }
-
         function validateStep(step) {
             // Optional: Add specific validation for each step
             // For now, we trust the user or the backend
