@@ -95,6 +95,7 @@ $toast = get_toast_message();
     </style>
 </head>
 <body class="font-sans text-slate-900">
+    <?php include '../components/marquee.php'; ?>
 
     <header class="sticky top-0 w-full z-[1000] bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -153,10 +154,11 @@ $toast = get_toast_message();
                         $status_ui = [
                             'pending_upload' => ['bg' => 'bg-slate-100', 'text' => 'text-slate-400', 'label' => 'Missing'],
                             'pending' => ['bg' => 'bg-amber-50', 'text' => 'text-amber-600', 'label' => 'Under Review'],
-                            'approved' => ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-600', 'label' => 'Approved'],
+                            'verified' => ['bg' => 'bg-blue-50', 'text' => 'text-blue-600', 'label' => 'Awaiting Global Approval'],
+                            'approved' => ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-600', 'label' => 'Finalized & Policy Active'],
                             'rejected' => ['bg' => 'bg-red-50', 'text' => 'text-red-600', 'label' => 'Rejected']
                         ];
-                        $ui = $status_ui[$status];
+                        $ui = $status_ui[$status] ?? $status_ui['pending'];
                         ?>
                         <span class="<?php echo $ui['bg']; ?> <?php echo $ui['text']; ?> text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full border border-white shadow-sm">
                             <?php echo $ui['label']; ?>
@@ -194,7 +196,12 @@ $toast = get_toast_message();
                         <i class="ph ph-hourglass-medium text-lg"></i>
                         Awaiting Review...
                     </div>
-                    <?php else: ?>
+                    <?php elseif ($status === 'verified'): ?>
+                    <div class="w-full bg-blue-50 text-blue-600 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2">
+                        <i class="ph ph-shield-check text-lg font-bold"></i>
+                        Verified by Org
+                    </div>
+                    <?php elseif ($status === 'approved'): ?>
                     <div class="w-full bg-emerald-50 text-emerald-600 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2">
                         <i class="ph ph-check-circle text-lg font-bold"></i>
                         Verified & Secure

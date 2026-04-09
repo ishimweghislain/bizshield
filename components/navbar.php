@@ -23,8 +23,8 @@
                         <a href="organization/dashboard.php" class="bg-primary text-white px-6 py-2 rounded-full hover:bg-primary-light transition-all shadow-lg active:scale-95">My Portal</a>
                     <?php endif; ?>
                 <?php else: ?>
-                    <a href="login.php" class="text-primary hover:underline">Login</a>
-                    <a href="register.php" class="bg-primary text-white px-6 py-2 rounded-full hover:bg-primary-light transition-all shadow-lg active:scale-95">Join Now</a>
+                    <a href="login.php" class="bg-primary text-white px-6 py-2 rounded-full hover:bg-primary-light transition-all shadow-lg active:scale-95">Sign In</a>
+                   <!--  <a href="register.php" class="bg-primary text-white px-6 py-2 rounded-full hover:bg-primary-light transition-all shadow-lg active:scale-95">Join Now</a> -->
                 <?php endif; ?>
             </div>
         </div>

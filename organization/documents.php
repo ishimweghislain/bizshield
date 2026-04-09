@@ -27,11 +27,15 @@ if ($role === 'org_admin' && isset($_GET['action']) && isset($_GET['doc_id'])) {
     $reason = $_GET['reason'] ?? 'Needs improvement.';
 
     // Fetch Target User ID for notification
-    $target_stmt = $pdo->prepare("SELECT user_id, doc_label FROM documents WHERE id = ?");
+    $target_stmt = $pdo->prepare("SELECT user_id, doc_label, file_name FROM documents WHERE id = ?");
     $target_stmt->execute([$doc_id]);
     $target_info = $target_stmt->fetch();
     $target_user_id = $target_info['user_id'];
-    $label = $target_info['doc_label'];
+    
+    $label = trim($target_info['doc_label'] ?? '');
+    if (empty($label)) {
+        $label = $target_info['file_name'] ?? 'Requirement Document';
+    }
 
     if ($action === 'approve') {
         $stmt = $pdo->prepare("UPDATE documents SET status = 'verified' WHERE id = ? AND organization_id = ?");
@@ -148,7 +152,9 @@ if (!empty($notifications)) {
     </script>
     <style>body { font-family: 'Inter', sans-serif; } .sidebar-link.active { background-color: #064E3B; color: white; box-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.1); }</style>
 </head>
-    <body class="bg-gray-50/50 flex min-h-screen">
+    <body class="bg-gray-50/50 flex flex-col min-h-screen">
+    <?php include '../components/marquee.php'; ?>
+    <div class="flex flex-grow">
     <?php include 'components/bottom_nav.php'; ?>
 
     <aside class="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 hidden lg:flex">
@@ -384,10 +390,10 @@ if (!empty($notifications)) {
                             <i class="ph ph-eye font-bold"></i>
                         </a>
                         <?php if ($role === 'org_admin' && $doc['status'] === 'pending'): ?>
-                        <a href="?action=approve&doc_id=<?php echo $doc['id']; ?>" class="w-10 h-10 bg-green-50 text-green-600 rounded-full flex items-center justify-center hover:bg-green-500 hover:text-white transition-all shadow-sm">
+                        <a href="?action=approve&doc_id=<?php echo $doc['id']; ?><?php echo $user_id_filter ? '&user_id='.$user_id_filter : ''; ?>" class="w-10 h-10 bg-green-50 text-green-600 rounded-full flex items-center justify-center hover:bg-green-500 hover:text-white transition-all shadow-sm">
                             <i class="ph ph-check-bold font-bold"></i>
                         </a>
-                        <button onclick="rejectDoc(<?php echo $doc['id']; ?>)" class="w-10 h-10 bg-red-50 text-red-600 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm">
+                        <button onclick="rejectDoc(<?php echo $doc['id']; ?>, '<?php echo $user_id_filter; ?>')" class="w-10 h-10 bg-red-50 text-red-600 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm">
                             <i class="ph ph-x-bold font-bold"></i>
                         </button>
                         <?php endif; ?>
@@ -460,6 +466,7 @@ if (!empty($notifications)) {
         </div>
     </main>
 
+    </div>
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script>
         AOS.init({ duration: 800, once: true });
@@ -484,10 +491,12 @@ if (!empty($notifications)) {
             }
         }
 
-        function rejectDoc(docId) {
+        function rejectDoc(docId, userId) {
             const reason = prompt("Enter rejection reason:");
             if (reason) {
-                window.location.href = `?action=reject&doc_id=${docId}&reason=${encodeURIComponent(reason)}`;
+                let url = `?action=reject&doc_id=${docId}&reason=${encodeURIComponent(reason)}`;
+                if (userId) url += `&user_id=${userId}`;
+                window.location.href = url;
             }
         }
     </script>

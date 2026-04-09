@@ -20,13 +20,18 @@ if (isset($_GET['doc_action']) && isset($_GET['doc_id'])) {
     $reason = $_GET['reason'] ?? 'Document does not meet requirements.'; // Default reason for rejection
 
     // Fetch Target User ID, label, and existing rejection count
-    $target_stmt = $pdo->prepare("SELECT user_id, doc_label, rejection_count FROM documents WHERE id = ?");
+    $target_stmt = $pdo->prepare("SELECT user_id, doc_label, file_name, rejection_count FROM documents WHERE id = ?");
     $target_stmt->execute([$doc_id]);
     $target_info = $target_stmt->fetch();
     $target_user_id = $target_info['user_id'];
-    $label = $target_info['doc_label'] ?: 'Requirement Document';
+    
+    // Fallback logic for label
+    $label = trim($target_info['doc_label'] ?? '');
+    if (empty($label)) {
+        $label = $target_info['file_name'] ?? 'Requirement Document';
+    }
+    
     $rejection_count = (int)$target_info['rejection_count'];
-
     $stars = str_repeat('*', $rejection_count);
     $display_label = $label . $stars;
     
@@ -268,8 +273,8 @@ $toast = get_toast_message();
                                 </a>
                             </div>
                             <?php if ($doc['status'] == 'pending'): ?>
-                            <a href="?id=<?php echo $org_id; ?>&doc_id=<?php echo $doc['id']; ?>&doc_action=approve" class="p-3 bg-green-50 text-green-600 rounded-xl hover:bg-green-500 hover:text-white transition-all"><i class="ph ph-check-bold font-bold"></i></a>
-                            <button onclick="rejectDoc(<?php echo $doc['id']; ?>)" class="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-500 hover:text-white transition-all"><i class="ph ph-x-bold font-bold"></i></button>
+                            <a href="?id=<?php echo $org_id; ?>&doc_id=<?php echo $doc['id']; ?>&doc_action=approve<?php echo $user_id_filter ? '&user_id='.$user_id_filter : ''; ?>" class="p-3 bg-green-50 text-green-600 rounded-xl hover:bg-green-500 hover:text-white transition-all"><i class="ph ph-check-bold font-bold"></i></a>
+                            <button onclick="rejectDoc(<?php echo $doc['id']; ?>, '<?php echo $user_id_filter; ?>')" class="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-500 hover:text-white transition-all"><i class="ph ph-x-bold font-bold"></i></button>
                             <?php endif; ?>
                          </div>
                     </div>
@@ -319,10 +324,12 @@ $toast = get_toast_message();
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script>
         AOS.init({ duration: 800, once: true });
-        function rejectDoc(docId) {
+        function rejectDoc(docId, userId) {
             const reason = prompt("Reason for rejection:", "Document is blurred or incorrect.");
             if (reason) {
-                window.location.href = `?id=<?php echo $org_id; ?>&doc_id=${docId}&doc_action=reject&reason=${encodeURIComponent(reason)}`;
+                let url = `?id=<?php echo $org_id; ?>&doc_id=${docId}&doc_action=reject&reason=${encodeURIComponent(reason)}`;
+                if (userId) url += `&user_id=${userId}`;
+                window.location.href = url;
             }
         }
     </script>

@@ -21,12 +21,12 @@
         <?php else: ?>
         <a href="login.php" class="flex flex-col items-center gap-1 <?php echo basename($_SERVER['PHP_SELF']) == 'login.php' ? 'text-primary' : ''; ?>">
             <i class="ph ph-sign-in text-2xl"></i>
-            <span class="text-[10px] font-bold uppercase tracking-tighter">Login</span>
+            <span class="text-[10px] font-bold uppercase tracking-tighter">Sign In</span>
         </a>
-        <a href="register.php" class="flex flex-col items-center gap-1 <?php echo basename($_SERVER['PHP_SELF']) == 'register.php' ? 'text-primary' : ''; ?>">
+        <!-- <a href="register.php" class="flex flex-col items-center gap-1 <?php echo basename($_SERVER['PHP_SELF']) == 'register.php' ? 'text-primary' : ''; ?>">
             <i class="ph ph-user-plus text-2xl"></i>
             <span class="text-[10px] font-bold uppercase tracking-tighter">Join</span>
-        </a>
+        </a> -->
         <?php endif; ?>
     </div>
 </nav>

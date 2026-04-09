@@ -30,7 +30,7 @@ try {
         username VARCHAR(100) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL UNIQUE,
-        role ENUM('admin', 'org_admin', 'org_user') NOT NULL,
+        role ENUM('admin', 'org_admin', 'org_user', 'member') NOT NULL,
         status ENUM('active', 'disabled') DEFAULT 'active',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE

@@ -49,7 +49,7 @@
                     We help companies join together to buy insurance. When more businesses join, the price goes down for everyone.
                 </p>
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a href="register.php" class="w-full sm:w-auto bg-white text-primary px-8 py-4 rounded-full font-bold text-lg hover:bg-green-50 transition-all shadow-xl">Join BizShield</a>
+                    <a href="login.php" class="w-full sm:w-auto bg-white text-primary px-8 py-4 rounded-full font-bold text-lg hover:bg-green-50 transition-all shadow-xl">Portal Access</a>
                     <a href="about.php" class="w-full sm:w-auto bg-transparent border-2 border-white/50 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white/10 transition-all">Learn More</a>
                 </div>
             </div>
