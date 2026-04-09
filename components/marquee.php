@@ -19,7 +19,7 @@ $marquee_items = [];
 
 if ($is_in_dashboard) {
     // DASHBOARD MARQUEE: Show specific notifications
-    $notifications = get_active_notifications($_SESSION['org_id'] ?? null);
+    $notifications = get_active_notifications($_SESSION['org_id'] ?? null, $_SESSION['user_id'] ?? null);
     
     // For members, we might want to filter or show their specific ones too
     // get_active_notifications probably handles org-wide ones.

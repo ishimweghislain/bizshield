@@ -27,15 +27,26 @@ function set_toast_message($message, $type = 'success') {
     $_SESSION['toast'] = ['message' => $message, 'type' => $type];
 }
 
-function get_active_notifications($org_id = null, $limit = 5) {
+function get_active_notifications($org_id = null, $user_id = null, $limit = 5) {
     global $pdo;
+    
+    // Base conditions: always show global notifications (both IDs null)
+    $conditions = ["(organization_id IS NULL AND user_id IS NULL)"];
+    $params = [];
+
     if ($org_id) {
-        $stmt = $pdo->prepare("SELECT * FROM notifications WHERE (organization_id = ? OR organization_id IS NULL) ORDER BY created_at DESC LIMIT $limit");
-        $stmt->execute([$org_id]);
-    } else {
-        $stmt = $pdo->prepare("SELECT * FROM notifications WHERE organization_id IS NULL ORDER BY created_at DESC LIMIT $limit");
-        $stmt->execute();
+        $conditions[] = "organization_id = ?";
+        $params[] = $org_id;
     }
+
+    if ($user_id) {
+        $conditions[] = "user_id = ?";
+        $params[] = $user_id;
+    }
+
+    $sql = "SELECT * FROM notifications WHERE (" . implode(" OR ", $conditions) . ") ORDER BY created_at DESC LIMIT " . (int)$limit;
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
     return $stmt->fetchAll();
 }
 ?>
