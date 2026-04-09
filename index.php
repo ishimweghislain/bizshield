@@ -24,7 +24,7 @@
     </script>
     <style>
         .hero-pattern {
-            background-image: linear-gradient(to bottom, rgba(6, 78, 59, 0.8), rgba(6, 78, 59, 0.95)), url('images/insurance.jpg');
+            background-image: linear-gradient(to bottom, rgba(2, 44, 34, 0.75), rgba(2, 44, 34, 0.9)), url('images/hero_bg.png');
             background-size: cover;
             background-position: center;
         }
